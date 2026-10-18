@@ -35,5 +35,5 @@ jobs:
     - name: Upload EXE Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: Windows-Executable
+        name: Python-attempt
         path: dist/main.exe  # PyInstaller outputs the final file inside the 'dist' folder
