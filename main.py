@@ -10,3 +10,4 @@ from kivy.core.audio import SoundLoader
 from kivy.uix.floatlayout import FloatLayout
 from kivy.core.window import Window
 
+class AdventureApp(App):
