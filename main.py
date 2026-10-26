@@ -11,3 +11,7 @@ from kivy.uix.floatlayout import FloatLayout
 from kivy.core.window import Window
 
 class AdventureApp(App):
+
+
+if __name__ == "__main__":
+    JumpscareApp().run()
