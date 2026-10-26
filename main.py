@@ -68,8 +68,8 @@ class AdventureApp(App):
         )
 
         self.layout.add_widget(self.logo)
-        Clock.schedule_once(desclaimer, 6)
-        return layout
+        Clock.schedule_once(self.disclaimer, 6)
+        return self.layout
             
 if __name__ == "__main__":
     JumpscareApp().run()
