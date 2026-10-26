@@ -27,5 +27,15 @@ class AdventureApp(App):
             self.crack.volume = 1
             self.crack.loop = True
 
+        self.death_sound = SoundLoader.load("assets/death")
+        if self.death_sound:
+            self.death_sound.volume = 1
+            self.death_sound.loop = False
+
+        self.death_sound = SoundLoader.load("assets/death")
+        if self.death_sound:
+            self.death_sound.volume = 1
+            self.death_sound.loop = False
+
 if __name__ == "__main__":
     JumpscareApp().run()
