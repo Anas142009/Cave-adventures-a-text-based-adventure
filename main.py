@@ -57,6 +57,8 @@ class AdventureApp(App):
             self.vic_ammbience2.volume = 0.75
             self.vic_ambience2.loop = True
 
+        self.layout = float_layout()
+        
         self.logo = Image( #all of them have = to designate and a comma to  follow up
             source="assets/logo.png",
             size_hint=(1, 1),
