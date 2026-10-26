@@ -9,13 +9,23 @@ from kivy.core.audio import SoundLoader
 from kivy.uix.floatlayout import FloatLayout
 from kivy.core.window import Window
 
+
 class AdventureApp(App):
     def build(self):
         self.ambience = SoundLoader.load("assets/ambience.mp3")
         if self.ambience:
-            self.ambience.volue = 0.8
+            self.ambience.volume = 0.8
             self.ambience.loop = True
-        
+            
+        self.collapse = SoundLoader.load("assets/collapse.mp3")
+        if self.collapse:
+            self.collapse.volume = 1
+            self.collapse.loop = False
+
+        self.crack = SoundLoader.load("assets/crack_sound.mp3")
+        if self.crack:
+            self.crack.volume = 1
+            self.crack.loop = True
 
 if __name__ == "__main__":
     JumpscareApp().run()
