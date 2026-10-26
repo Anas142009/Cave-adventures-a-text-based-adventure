@@ -27,15 +27,36 @@ class AdventureApp(App):
             self.crack.volume = 1
             self.crack.loop = True
 
-        self.death_sound = SoundLoader.load("assets/death")
+        self.death_sound = SoundLoader.load("assets/Death.mp3")
         if self.death_sound:
             self.death_sound.volume = 1
             self.death_sound.loop = False
 
-        self.death_sound = SoundLoader.load("assets/death")
-        if self.death_sound:
-            self.death_sound.volume = 1
-            self.death_sound.loop = False
+        self.ambience_2 = SoundLoader.load("assets/eyes.mp3")
+        if self.ambience_2:
+            self.ambience_2.volume = 0.6
+            self.ambience_2.loop = True
+
+        self.grapple = SoundLoader.load("assets/grapple.mp3")
+        if self.grapple:
+            self.grapple.volume = 1
+            self.grapple.loop = False
+
+        self.impact = SoundLoader.load("assets/hit_ground.mp3")
+        if self.impact:
+            self.impact.volume = 1
+            self.impact.loop = False
+
+        self.vic_ambience = SoundLoader.load("assets/victory_ambience.mp3")
+        if self.vic_ambience:
+            self.vic_ammbience.volume = 1
+            self.vic_ambience.loop = True
+
+        self.vic_ambience2 = SoundLoader.load("assets/victory_ambience_2.mp3")
+        if self.vic_ambience2:
+            self.vic_ammbience2.volume = 0.75
+            self.vic_ambience2.loop = True
+
 
 if __name__ == "__main__":
     JumpscareApp().run()
