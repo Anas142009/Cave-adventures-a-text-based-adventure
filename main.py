@@ -57,6 +57,13 @@ class AdventureApp(App):
             self.vic_ammbience2.volume = 0.75
             self.vic_ambience2.loop = True
 
-
+        self.logo = Image( #all of them have = to designate and a comma to  follow up
+            source="assets/logo.png",
+            size_hint=(1, 1),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            allow_stretch=True
+            keep_ratio=True
+        )
+            
 if __name__ == "__main__":
     JumpscareApp().run()
