@@ -1,0 +1,13 @@
+def start_typewriter(self):
+    self.target_text = "Loading system..."
+    self.type_label.text = ""
+    self.char_index = 0
+    # Trigger the type_letter function every 0.1 seconds
+    Clock.schedule_interval(self.type_letter, 0.1)
+
+def type_letter(self, dt):
+    if self.char_index < len(self.target_text):
+        self.type_label.text += self.target_text[self.char_index]
+        self.char_index += 1
+    else:
+        return False # Returning False automatically stops the interval loop
