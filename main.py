@@ -66,6 +66,10 @@ class AdventureApp(App):
             allow_stretch=True
             keep_ratio=True
         )
+
+        self.layout.add_widget(self.logo)
+        Clock.schedule_once(desclaimer, 6)
+        return layout
             
 if __name__ == "__main__":
     JumpscareApp().run()
