@@ -57,13 +57,13 @@ class AdventureApp(App):
             self.vic_ammbience2.volume = 0.75
             self.vic_ambience2.loop = True
 
-        self.layout = float_layout()
+        self.layout = FloatLayout()
         
         self.logo = Image( #all of them have = to designate and a comma to  follow up
             source="assets/logo.png",
             size_hint=(1, 1),
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
-            allow_stretch=True
+            allow_stretch=True,
             keep_ratio=True
         )
 
@@ -91,12 +91,12 @@ class AdventureApp(App):
 
     def typewrite(self, dt, target_text, label):
         if self.char_index < len(self.target_text):
-        self.label.text += self.target_text[self.char_index] #The [] act as an index to determine which character to write.
-        self.char_index += 1 #The addition makes it move from one character to the next.
-    else:
-        return False # Returning False automatically stops the interval loop
+           self.label.text += self.target_text[self.char_index] #The [] act as an index to determine which character to write.
+           self.char_index += 1 #The addition makes it move from one character to the next.
+        else:
+           return False # Returning False automatically stops the interval loop
         
         
             
 if __name__ == "__main__":
-    JumpscareApp().run()
+    AdventureApp().run()
