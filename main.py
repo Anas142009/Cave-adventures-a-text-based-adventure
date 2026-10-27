@@ -75,9 +75,14 @@ class AdventureApp(App):
         self.layout.clear_widgets()
         disc_text = "Disclaimer\n\n The graphics and audio in this game are added for extra immersion.\n They are not meant to accurately represent the descriptive text forming this game." 
         self.disclaimer = Label(
-            text = "",
-            pos_hint = {'center_x': 0.5, 'center_y': 0.5},
-            
+            text="",
+            font_size="24sp",
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            text_size=(Window.width * 0.9, None), # Prevents text from stretching off screen
+            halign='center'
+        )
+        self.layout.add_widget(self.disclaimer)
+        Clock.schedule_interval(self.
             
 if __name__ == "__main__":
     JumpscareApp().run()
