@@ -1,7 +1,7 @@
 [app]
 
-title = Python attempt
-package.name = jumpscare
+title = Cave Adventures 
+package.name = caveadventure
 package.domain = org.example
 source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,wav,mp3,jpeg,TTF
