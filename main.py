@@ -112,7 +112,7 @@ class AdventureApp(App):
         self.start_button.bind(on_press=self.start_game)
         self.layout.add_widget(self.UI_image)
         self.layout.add_widget(self.start_button)
-        self.layout.add_widget(self.title)
+        self.layout.add_widget(self.Title)
             
 
     def typewrite(self, dt, target_text, label):
