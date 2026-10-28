@@ -83,8 +83,10 @@ class AdventureApp(App):
         )
         self.layout.add_widget(self.disclaimer_label)
         self.char_index = 0
-        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label, self.main_menu), 0.1)
-        
+        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.1)
+		      schedule_time = len(self.disc_text) * 0.1 + 2
+        Clock.schedule_once(self.main_menu, schedule_time)
+  		      
     def main_menu(self, dt):
         self.layout.clear_widgets()
         self.title = Label(
@@ -113,12 +115,11 @@ class AdventureApp(App):
         self.layout.add_widget(self.title)
             
 
-    def typewrite(self, dt, target_text, label, function):
+    def typewrite(self, dt, target_text, label):
         if self.char_index < len(target_text):
             label.text += target_text[self.char_index] #The [] act as an index to determine which character to write.
             self.char_index += 1 #The addition makes it move from one character to the next.
         else:
-            Clock.schedule_once(function, 4)
             return False # Returning False automatically stops the interval loop
         
         
