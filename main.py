@@ -135,7 +135,7 @@ class AdventureApp(App):
         self.quit_button.bind(on_press=self.quit)
         self.option_button.bind(on_press=self.option_menu)
         self.start_button.bind(on_press=self.start_game)
-        if images_on == True
+        if images_on == True:
             self.layout.add_widget(self.UI_image)
         self.layout.add_widget(self.option_button)
         self.layout.add_widget(self.quit_button)
