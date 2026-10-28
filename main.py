@@ -97,7 +97,7 @@ class AdventureApp(App):
         self.start_button = Button(
             text="Start",
             font_size="24sp",
-            pos_hint={'center_x': 0.5, 'bottom': 0.05),
+            pos_hint={'center_x': 0.5, 'bottom': 0.05},
             halign='center'
         )
         self.UI_image = Image(
