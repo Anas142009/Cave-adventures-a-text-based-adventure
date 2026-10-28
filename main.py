@@ -60,7 +60,7 @@ class AdventureApp(App):
         self.layout = FloatLayout()
         
         self.logo = Image( #all of them have = to designate and a comma to  follow up
-            source="assets/logo.png",
+            source="assets/Logo.png",
             size_hint=(1, 1),
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
             allow_stretch=True,
@@ -84,7 +84,8 @@ class AdventureApp(App):
         self.layout.add_widget(self.disclaimer_label)
         self.char_index = 0
         Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.1)
-        Clock.schedule_once(self.main_menu, 5)
+        if self.continue == 1:
+            Clock.schedule_once(self.main_menu, 5)
 
     def main_menu(self, dt):
         self.layout.clear_widgets()
@@ -116,10 +117,12 @@ class AdventureApp(App):
 
     def typewrite(self, dt, target_text, label):
         if self.char_index < len(target_text):
-           label.text += target_text[self.char_index] #The [] act as an index to determine which character to write.
-           self.char_index += 1 #The addition makes it move from one character to the next.
+            label.text += target_text[self.char_index] #The [] act as an index to determine which character to write.
+            self.char_index += 1 #The addition makes it move from one character to the next.
+            self.continue = 0
         else:
-           return False # Returning False automatically stops the interval loop
+            self.continue = 1
+            return False # Returning False automatically stops the interval loop
         
         
             
