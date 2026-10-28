@@ -75,21 +75,21 @@ class AdventureApp(App):
         self.layout.clear_widgets()
         self.disc_text = "Disclaimer\n\n The graphics and audio in this game are added for extra immersion.\n They are not meant to accurately represent the descriptive text forming this game." 
         self.disclaimer_label = Label(
-            text="",
+        	text="",
             font_size="24sp",
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
             text_size=(Window.width * 0.9, None), # Prevents text from stretching off screen
             halign='center'
         )
-        self.layout.add_widget(self.disclaimer_label)
-        self.char_index = 0
-        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.05)
+    	self.layout.add_widget(self.disclaimer_label)
+    	self.char_index = 0
+    	Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.05)
 		schedule_time = len(self.disc_text) * 0.1 + 2
 		Clock.schedule_once(self.main_menu, schedule_time)
   		      
     def main_menu(self, dt):
         self.layout.clear_widgets()
-        self.title = Label(
+        self.Title = Label(
             text="CAVE\nADVENTURES",
             font_size="30sp",
             pos_hint={'center_x': 0.5, 'top': 0.05},
@@ -117,10 +117,10 @@ class AdventureApp(App):
 
     def typewrite(self, dt, target_text, label):
         if self.char_index < len(target_text):
-            label.text += target_text[self.char_index] #The [] act as an index to determine which character to write.
-            self.char_index += 1 #The addition makes it move from one character to the next.
+        	label.text += target_text[self.char_index] #The [] act as an index to determine which character to write.
+        	self.char_index += 1 #The addition makes it move from one character to the next.
         else:
-            return False # Returning False automatically stops the interval loop
+        	return False # Returning False automatically stops the interval loop
         
         
             
