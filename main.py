@@ -101,7 +101,17 @@ class AdventureApp(App):
             halign='center'
         )
         self.UI_image = Image(
-            source="assets/
+            source="assets/Cave.jpg",
+            size_hint=(1, 1),
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            allow_stretch=True,
+            keep_ratio=True
+        )
+        self.UI_image.opacity=0.95
+        self.start_button.bind(on_press=self.start_game)
+        self.layout.add_widget(self.UI_image)
+        self.layout.add_widget(self.start_button)
+        self.layout.add_widget(self.title)
             
 
     def typewrite(self, dt, target_text, label):
