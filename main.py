@@ -66,7 +66,9 @@ class AdventureApp(App):
             allow_stretch=True,
             keep_ratio=True
         )
-
+        self.images_on = True
+        self.ambience_on = True
+        self.effects_on = True
         self.layout.add_widget(self.logo)
         Clock.schedule_once(self.disclaimer, 6)
         return self.layout
@@ -84,35 +86,63 @@ class AdventureApp(App):
         self.layout.add_widget(self.disclaimer_label)
         self.char_index = 0
         Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.05)
-        schedule_time = len(self.disc_text) * 0.1 + 2
-        Clock.schedule_once(self.main_menu, schedule_time)
-                
-    def main_menu(self, dt):
+        schedule_time = len(self.disc_text) * 0.1
+        Clock.schedule_once(self.add_understand, schedule_time)
+
+    def add_understand(self, dt):
+        self.understand_button = Button(
+            text="I understand",
+            font_size="24sp",
+            pos_hint={'center_x': 0.5, 'bottom': 0.05},
+            size_hint=(1, 0.1),
+            halign='center'
+        )
+        self.understand_button.bind(on_press=self.main_menu)
+        
+    def main_menu(self, instance):
         self.layout.clear_widgets()
         self.Title = Label(
             text="CAVE\nADVENTURES",
             font_size="30sp",
             pos_hint={'center_x': 0.5, 'top': 0.05},
-            halign='center'
         )
         self.start_button = Button(
             text="Start",
             font_size="24sp",
-            pos_hint={'center_x': 0.5, 'bottom': 0.05},
-            halign='center'
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            size_hint=(0.65, 0.2)
         )
         self.UI_image = Image(
             source="assets/Cave.jpg",
             size_hint=(1, 1),
             pos_hint={'center_x': 0.5, 'center_y': 0.5},
             allow_stretch=True,
-            keep_ratio=True
+            keep_ratio=False
+        )
+        self.option_button = Button(
+            text="Options",
+            font_size="22sp",
+            pos_hint={'center_x': 0.5, 'bottom': 0.3},
+            size_hint=(0.5, 0.1)
+        )
+        self.quit_button = Button(
+            text="Quit",
+            font_size="22sp",
+            size_hint=(0.5, 0.1),
+            pos_hint={'center_x': 0.5, 'bottom':0.1}
         )
         self.UI_image.opacity=0.95
+        self.quit_button.bind(on_press=self.quit)
+        self.option_button.bind(on_press=self.option_menu)
         self.start_button.bind(on_press=self.start_game)
-        self.layout.add_widget(self.UI_image)
+        if images_on == True
+            self.layout.add_widget(self.UI_image)
+        self.layout.add_widget(self.option_button)
+        self.layout.add_widget(self.quit_button)
         self.layout.add_widget(self.start_button)
         self.layout.add_widget(self.Title)
+        if ambience_on == True:
+            self.ambience.play()
             
 
     def typewrite(self, dt, target_text, label):
@@ -121,7 +151,9 @@ class AdventureApp(App):
             self.char_index += 1 #The addition makes it move from one character to the next.
         else:
             return False # Returning False automatically stops the interval loop
-        
+
+    def quit(self, instance):
+        self.stop()
         
             
 if __name__ == "__main__":
