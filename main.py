@@ -84,7 +84,7 @@ class AdventureApp(App):
         self.layout.add_widget(self.disclaimer_label)
         self.char_index = 0
         Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.1)
-		      schedule_time = len(self.disc_text) * 0.1 + 2
+		schedule_time = len(self.disc_text) * 0.1 + 2
         Clock.schedule_once(self.main_menu, schedule_time)
   		      
     def main_menu(self, dt):
