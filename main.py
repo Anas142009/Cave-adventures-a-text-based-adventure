@@ -81,7 +81,7 @@ class AdventureApp(App):
             text_size=(Window.width * 0.9, None), # Prevents text from stretching off screen
             halign='center'
         )
-        self.layout.add_widget(self.disclaimer)
+        self.layout.add_widget(self.disclaimer_label)
         self.char_index = 0
         Clock.schedule_interval(self.typewrite(self.disc_text, self.disclaimer_label), 0.1)
         Clock.schedule_once(self.main_menu, 5)
