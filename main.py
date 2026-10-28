@@ -49,12 +49,12 @@ class AdventureApp(App):
 
         self.vic_ambience = SoundLoader.load("assets/victory_ambience.mp3")
         if self.vic_ambience:
-            self.vic_ammbience.volume = 1
+            self.vic_ambience.volume = 1
             self.vic_ambience.loop = True
 
         self.vic_ambience2 = SoundLoader.load("assets/victory_ambience_2.mp3")
         if self.vic_ambience2:
-            self.vic_ammbience2.volume = 0.75
+            self.vic_ambience2.volume = 0.75
             self.vic_ambience2.loop = True
 
         self.layout = FloatLayout()
@@ -87,7 +87,22 @@ class AdventureApp(App):
         Clock.schedule_once(self.main_menu, 5)
 
     def main_menu(self, dt):
-        self.stop()
+        self.layout.clear_widgets()
+        self.title = Label(
+            text="CAVE\nADVENTURES",
+            font_size="30sp",
+            pos_hint={'center_x': 0.5, 'top': 0.05},
+            halign='center'
+        )
+        self.start_button = Button(
+            text="Start",
+            font_size="24sp",
+            pos_hint={'center_x': 0.5, 'bottom': 0.05),
+            halign='center'
+        )
+        self.UI_image = Image(
+            source="assets/
+            
 
     def typewrite(self, dt, target_text, label):
         if self.char_index < len(target_text):
