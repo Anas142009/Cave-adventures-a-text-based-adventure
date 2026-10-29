@@ -61,7 +61,7 @@ class AdventureApp(App):
         self.images_on = True # default value
         self.ambience_on = True
         self.effects_on = True
-        Clock.schedule_once(self.loadlogo, 5)
+        Clock.schedule_once(self.loadlogo, 3)
         return self.layout
         
     def loadlogo(self, dt):
@@ -78,7 +78,7 @@ class AdventureApp(App):
         
     def disclaimer(self, dt):
         self.layout.clear_widgets()
-        self.disc_text = "Disclaimer\n\n The graphics and audio in this game are added for extra immersion.\n They are not meant to accurately represent the descriptive text forming this game." 
+        self.disc_text = "Disclaimer\n\n The graphics and audio in this game are added for extra immersion.\n They are not meant to accurately represent the descriptive text that forms this game." 
         self.disclaimer_label = Label(
             text="",
             font_size="24sp",
@@ -89,7 +89,7 @@ class AdventureApp(App):
         self.layout.add_widget(self.disclaimer_label)
         self.char_index = 0
         Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.05)
-        schedule_time = len(self.disc_text) * 0.05
+        schedule_time = len(self.disc_text) * 0.05 + 0.5
         Clock.schedule_once(self.add_understand, schedule_time)
 
     def add_understand(self, dt):
@@ -104,7 +104,8 @@ class AdventureApp(App):
         
     def main_menu(self, instance):
         self.layout.clear_widgets()
-        self.Title = Label(
+        
+        self.gamename = Label(
             text="CAVE\nADVENTURES",
             font_size="30sp",
             pos_hint={'center_x': 0.5, 'top': 0.05},
@@ -143,7 +144,7 @@ class AdventureApp(App):
         self.layout.add_widget(self.option_button)
         self.layout.add_widget(self.quit_button)
         self.layout.add_widget(self.start_button)
-        self.layout.add_widget(self.Title)
+        self.layout.add_widget(self.gamename)
         if ambience_on == True:
             self.ambience.play()
             
