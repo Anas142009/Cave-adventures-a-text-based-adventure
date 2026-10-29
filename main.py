@@ -147,7 +147,38 @@ class AdventureApp(App):
         if ambience_on == True:
             self.ambience.play()
             
-
+    def option_menu(self, instance):
+        self.layout.clear_widgets()
+        self.back_button = Button(
+            text="back",
+            font_size="24sp",
+            pos_hint={'center_x': 0.5, 'y': 0.1},
+            size_hint=(0.5, 0.09)
+        )
+        self.back_button.bind(on_press=self.main_menu)
+        
+        self.images_label = Label(
+            text="Images:",
+            font_size="24sp",
+            pos_hint={'left': 0.05, 'y': 0.97}
+        )
+        
+        self.ambience_label = Label(
+            text="Ambience:",
+            font_size="24sp",
+            pos_hint={'left': 0.05, 'y': 0.55}
+        )
+        
+        self.effects_label = Label(
+            text="Effects:",
+            font_size="24sp",
+            pos_hint={'left': 0.05, 'y': 0.25}
+        )
+        
+        self.layout.add_widget(self.images_label)
+        self.layout.add_widget(self.effects_label)
+        self.layout.add_widget(self.ambience_label)
+        self.layout.add_widget(self.back_button)
     def typewrite(self, dt, target_text, label):
         if self.char_index < len(target_text):
             label.text += target_text[self.char_index] #The [] act as an index to determine which character to write.
