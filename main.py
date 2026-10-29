@@ -110,6 +110,7 @@ class AdventureApp(App):
             font_size="30sp",
             pos_hint={'center_x': 0.5, 'top': 0.05},
         )
+        
         self.start_button = Button(
             text="Start",
             font_size="24sp",
@@ -123,30 +124,39 @@ class AdventureApp(App):
             allow_stretch=True,
             keep_ratio=False
         )
+        
         self.option_button = Button(
             text="Options",
             font_size="22sp",
             pos_hint={'center_x': 0.5, 'bottom': 0.3},
             size_hint=(0.5, 0.1)
         )
+        
         self.quit_button = Button(
             text="Quit",
             font_size="22sp",
             size_hint=(0.5, 0.1),
             pos_hint={'center_x': 0.5, 'bottom':0.1}
         )
+        
         self.UI_image.opacity=0.95
         self.quit_button.bind(on_press=self.quit)
         self.option_button.bind(on_press=self.option_menu)
         self.start_button.bind(on_press=self.start_game)
+        
         if images_on == True:
             self.layout.add_widget(self.UI_image)
+            
         self.layout.add_widget(self.option_button)
         self.layout.add_widget(self.quit_button)
         self.layout.add_widget(self.start_button)
         self.layout.add_widget(self.gamename)
+        
         if ambience_on == True:
             self.ambience.play()
+
+    def start_game(self, instance):
+        self.stop()
             
     def option_menu(self, instance):
         self.layout.clear_widgets()
