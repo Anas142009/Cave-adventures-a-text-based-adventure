@@ -120,7 +120,7 @@ class AdventureApp(App):
         self.UI_image = Image(
             source="assets/Cave.jpg",
             size_hint=(1, 1),
-            pos_hint={'center_x': 0.5, 'y': 0.4},
+            pos_hint={'center_x': 0.5, 'center_y': 0.5},
             allow_stretch=True,
             keep_ratio=False
         )
