@@ -162,23 +162,85 @@ class AdventureApp(App):
             font_size="24sp",
             pos_hint={'left': 0.05, 'y': 0.97}
         )
+        self.yes_image = Button(
+            text="On",
+            font_size="24sp",
+            size_hint=(0.33, 0.09),
+            pos_hint={'center_x': 0.5, 'y': 0.97}
+        )
+        self.no_image = Button(
+            text="Off",
+            font_size="24sp",
+            size_hint=(0.33, 0.09),
+            pos_hint={'right': 0.05, 'y': 0.97}
+        )
+        self.yes_image.bind(on_press=self.turn_on_image)
+        self.no_image.bind(on_press=self.turn_off_image)
+        if self.images_on == True:
+            self.yes_image.disabled = True
+        else:
+            self.no_image.disabled = True
         
         self.ambience_label = Label(
             text="Ambience:",
             font_size="24sp",
             pos_hint={'left': 0.05, 'y': 0.55}
         )
+        self.yes_ambience = Button(
+            text="On",
+            font_size="24sp",
+            size_hint=(0.33, 0.09),
+            pos_hint={'center_x': 0.5, 'y': 0.55}
+        )
+        self.no_ambience = Button(
+            text="Off",
+            font_size="24sp",
+            size_hint=(0.33, 0.09),
+            pos_hint={'right': 0.05, 'y': 0.55}
+        )
+        self.yes_ambience.bind(on_press=self.turn_on_ambience)
+        self.no_ambience.bind(on_press=self.turn_off_ambience)
+        if self.ambience_on == True:
+            self.yes_ambience.disabled = True
+        else:
+            self.no_ambience.disabled = True
         
         self.effects_label = Label(
             text="Effects:",
             font_size="24sp",
             pos_hint={'left': 0.05, 'y': 0.25}
         )
+        self.yes_effect = Button(
+            text="On",
+            font_size="24sp",
+            size_hint=(0.33, 0.09),
+            pos_hint={'center_x': 0.5, 'y': 0.25}
+        )
+        self.no_effect = Button(
+            text="Off",
+            font_size="24sp",
+            size_hint=(0.33, 0.09),
+            pos_hint={'right': 0.05, 'y': 0.25}
+        )
+        self.yes_effect.bind(on_press=self.turn_on_effect)
+        self.no_effect.bind(on_press=self.turn_off_effect)
+        if self.effects_on == True:
+            self.yes_effect.disabled = True
+        else:
+            self.no_effect.disabled = True
+        
         
         self.layout.add_widget(self.images_label)
         self.layout.add_widget(self.effects_label)
         self.layout.add_widget(self.ambience_label)
         self.layout.add_widget(self.back_button)
+        self.layout.add_widget(self.yes_image)
+        self.layout.add_widget(self.no_image)
+        self.layout.add_widget(self.yes_ambience)
+        self.layout.add_widget(self.no_ambience)
+        self.layout.add_widget(self.yes_effect)
+        self.layout.add_widget(self.no_effect)
+        
     def typewrite(self, dt, target_text, label):
         if self.char_index < len(target_text):
             label.text += target_text[self.char_index] #The [] act as an index to determine which character to write.
@@ -186,6 +248,36 @@ class AdventureApp(App):
         else:
             return False # Returning False automatically stops the interval loop
 
+    def turn_on_image(self, instance):
+        self.images_on = True
+        self.yes_image.disabled = True
+        self.no_image.disabled = False
+
+    def turn_off_image(self, instance):
+        self.images_on = False
+        self.yes_image.disabled = False
+        self.no_image.disabled = True
+
+    def turn_on_ambience(self, instance):
+        self.ambience_on = True
+        self.yes_ambience.disabled = True
+        self.no_ambience.disabled = False
+
+    def turn_off_ambience(self, instance):
+        self.ambience_on = False
+        self.yes_ambience.disabled = False
+        self.no_ambience.disabled = True
+
+    def turn_on_effect(self, instance):
+        self.effects_on = True
+        self.yes_effect.disabled = True
+        self.no_effect.disabled = False
+
+    def turn_off_effect(self, instance):
+        self.effects_on = False
+        self.yes_effect.disabled = False
+        self.no_effect.disabled = True
+        
     def quit(self, instance):
         self.stop()
         
