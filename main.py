@@ -108,7 +108,7 @@ class AdventureApp(App):
         self.gamename = Label(
             text="CAVE\nADVENTURES",
             font_size="30sp",
-            pos_hint={'center_x': 0.5, 'top': 0.05},
+            pos_hint={'center_x': 0.5, 'y': 0.95},
         )
         
         self.start_button = Button(
@@ -120,7 +120,7 @@ class AdventureApp(App):
         self.UI_image = Image(
             source="assets/Cave.jpg",
             size_hint=(1, 1),
-            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            pos_hint={'center_x': 0.5, 'y': 0.4},
             allow_stretch=True,
             keep_ratio=False
         )
@@ -128,7 +128,7 @@ class AdventureApp(App):
         self.option_button = Button(
             text="Options",
             font_size="22sp",
-            pos_hint={'center_x': 0.5, 'bottom': 0.3},
+            pos_hint={'center_x': 0.5, 'y': 0.3},
             size_hint=(0.5, 0.1)
         )
         
@@ -136,10 +136,10 @@ class AdventureApp(App):
             text="Quit",
             font_size="22sp",
             size_hint=(0.5, 0.1),
-            pos_hint={'center_x': 0.5, 'bottom':0.1}
+            pos_hint={'center_x': 0.5, 'y':0.2}
         )
         
-        self.UI_image.opacity=0.95
+        self.UI_image.opacity=1
         self.quit_button.bind(on_press=self.quit)
         self.option_button.bind(on_press=self.option_menu)
         self.start_button.bind(on_press=self.start_game)
