@@ -108,13 +108,13 @@ class AdventureApp(App):
         self.gamename = Label(
             text="CAVE\nADVENTURES",
             font_size="30sp",
-            pos_hint={'center_x': 0.5, 'y': 0.95},
+            pos_hint={'center_x': 0.5, 'y': 0.8},
         )
         
         self.start_button = Button(
             text="Start",
             font_size="24sp",
-            pos_hint={'center_x': 0.5, 'center_y': 0.5},
+            pos_hint={'center_x': 0.5, 'y': 0.4},
             size_hint=(0.65, 0.2)
         )
         self.UI_image = Image(
@@ -128,7 +128,7 @@ class AdventureApp(App):
         self.option_button = Button(
             text="Options",
             font_size="22sp",
-            pos_hint={'center_x': 0.5, 'y': 0.3},
+            pos_hint={'center_x': 0.5, 'y': 0.2},
             size_hint=(0.5, 0.1)
         )
         
@@ -136,7 +136,7 @@ class AdventureApp(App):
             text="Quit",
             font_size="22sp",
             size_hint=(0.5, 0.1),
-            pos_hint={'center_x': 0.5, 'y':0.2}
+            pos_hint={'center_x': 0.5, 'y':0.1}
         )
         
         self.UI_image.opacity=1
@@ -171,19 +171,19 @@ class AdventureApp(App):
         self.images_label = Label(
             text="Images:",
             font_size="24sp",
-            pos_hint={'left': 0.05, 'y': 0.97}
+            pos_hint={'x': 0.1, 'y': 0.9}
         )
         self.yes_image = Button(
             text="On",
             font_size="24sp",
             size_hint=(0.33, 0.09),
-            pos_hint={'center_x': 0.5, 'y': 0.97}
+            pos_hint={'center_x': 0.5, 'y': 0.9}
         )
         self.no_image = Button(
             text="Off",
             font_size="24sp",
             size_hint=(0.33, 0.09),
-            pos_hint={'right': 0.05, 'y': 0.97}
+            pos_hint={'x': 0.9, 'y': 0.9}
         )
         self.yes_image.bind(on_press=self.turn_on_image)
         self.no_image.bind(on_press=self.turn_off_image)
@@ -195,7 +195,7 @@ class AdventureApp(App):
         self.ambience_label = Label(
             text="Ambience:",
             font_size="24sp",
-            pos_hint={'left': 0.05, 'y': 0.55}
+            pos_hint={'x': 0.1, 'y': 0.55}
         )
         self.yes_ambience = Button(
             text="On",
@@ -207,7 +207,7 @@ class AdventureApp(App):
             text="Off",
             font_size="24sp",
             size_hint=(0.33, 0.09),
-            pos_hint={'right': 0.05, 'y': 0.55}
+            pos_hint={'x': 0.9, 'y': 0.55}
         )
         self.yes_ambience.bind(on_press=self.turn_on_ambience)
         self.no_ambience.bind(on_press=self.turn_off_ambience)
@@ -219,7 +219,7 @@ class AdventureApp(App):
         self.effects_label = Label(
             text="Effects:",
             font_size="24sp",
-            pos_hint={'left': 0.05, 'y': 0.25}
+            pos_hint={'x: 0.1, 'y': 0.25}
         )
         self.yes_effect = Button(
             text="On",
@@ -231,7 +231,7 @@ class AdventureApp(App):
             text="Off",
             font_size="24sp",
             size_hint=(0.33, 0.09),
-            pos_hint={'right': 0.05, 'y': 0.25}
+            pos_hint={'x': 0.9, 'y': 0.25}
         )
         self.yes_effect.bind(on_press=self.turn_on_effect)
         self.no_effect.bind(on_press=self.turn_off_effect)
