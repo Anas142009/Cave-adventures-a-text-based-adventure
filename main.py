@@ -219,7 +219,7 @@ class AdventureApp(App):
         self.effects_label = Label(
             text="Effects:",
             font_size="24sp",
-            pos_hint={'x: 0.1, 'y': 0.25}
+            pos_hint={'x': 0.1, 'y': 0.25}
         )
         self.yes_effect = Button(
             text="On",
