@@ -144,7 +144,7 @@ class AdventureApp(App):
         self.option_button.bind(on_press=self.option_menu)
         self.start_button.bind(on_press=self.start_game)
         
-        if images_on == True:
+        if self.images_on == True:
             self.layout.add_widget(self.UI_image)
             
         self.layout.add_widget(self.option_button)
@@ -152,7 +152,7 @@ class AdventureApp(App):
         self.layout.add_widget(self.start_button)
         self.layout.add_widget(self.gamename)
         
-        if ambience_on == True:
+        if self.ambience_on == True:
             self.ambience.play()
 
     def start_game(self, instance):
