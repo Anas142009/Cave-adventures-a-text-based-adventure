@@ -58,7 +58,13 @@ class AdventureApp(App):
             self.vic_ambience2.loop = True
 
         self.layout = FloatLayout()
+        self.images_on = True # default value
+        self.ambience_on = True
+        self.effects_on = True
+        Clock.schedule_once(loadlogo, 5)
+        return self.layout
         
+    def loadlogo(self, dt):
         self.logo = Image( #all of them have = to designate and a comma to  follow up
             source="assets/Logo.png",
             size_hint=(1, 1),
@@ -66,13 +72,10 @@ class AdventureApp(App):
             allow_stretch=True,
             keep_ratio=True
         )
-        self.images_on = True
-        self.ambience_on = True
-        self.effects_on = True
+    
         self.layout.add_widget(self.logo)
-        Clock.schedule_once(self.disclaimer, 6)
-        return self.layout
-
+        Clock.schedule_once(self.disclaimer, 4)
+        
     def disclaimer(self, dt):
         self.layout.clear_widgets()
         self.disc_text = "Disclaimer\n\n The graphics and audio in this game are added for extra immersion.\n They are not meant to accurately represent the descriptive text forming this game." 
@@ -86,18 +89,18 @@ class AdventureApp(App):
         self.layout.add_widget(self.disclaimer_label)
         self.char_index = 0
         Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.05)
-        schedule_time = len(self.disc_text) * 0.1
+        schedule_time = len(self.disc_text) * 0.05
         Clock.schedule_once(self.add_understand, schedule_time)
 
     def add_understand(self, dt):
         self.understand_button = Button(
             text="I understand",
             font_size="24sp",
-            pos_hint={'center_x': 0.5, 'bottom': 0.05},
+            pos_hint={'center_x': 0.5, 'y': 0.05},
             size_hint=(1, 0.1),
-            halign='center'
         )
         self.understand_button.bind(on_press=self.main_menu)
+        self.layout.add_widget(self.understand_button)
         
     def main_menu(self, instance):
         self.layout.clear_widgets()
