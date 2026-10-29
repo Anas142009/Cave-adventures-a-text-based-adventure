@@ -61,7 +61,7 @@ class AdventureApp(App):
         self.images_on = True # default value
         self.ambience_on = True
         self.effects_on = True
-        Clock.schedule_once(loadlogo, 5)
+        Clock.schedule_once(self.loadlogo, 5)
         return self.layout
         
     def loadlogo(self, dt):
