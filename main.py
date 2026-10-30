@@ -108,7 +108,9 @@ class AdventureApp(App):
         self.gamename = Label(
             text="CAVE\nADVENTURES",
             font_size="29sp",
+            text_size=(Window.width * 0.9, None),
             pos_hint={'center_x': 0.5, 'center_y': 0.75},
+            halign='center'
         )
         
         self.start_button = Button(
@@ -164,7 +166,7 @@ class AdventureApp(App):
         self.back_button = Button(
             text="back",
             font_size="24sp",
-            pos_hint={'center_x': 0.5, 'y': 0.1},
+            pos_hint={'center_x': 0.5, 'center_y': 0.1},
             size_hint=(0.5, 0.09)
         )
         self.back_button.bind(on_press=self.main_menu)
