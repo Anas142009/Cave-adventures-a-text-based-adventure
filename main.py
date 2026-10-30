@@ -250,9 +250,10 @@ class AdventureApp(App):
         self.no_image.bind(on_press=self.turn_off_image)
         if self.images_on == True:
             self.yes_image.disabled = True
+            self.yes_image.background_color = [0, 1, 0, 1]
         else:
             self.no_image.disabled = True
-        
+            self.no_image.background_color = [0, 1, 0, 1]
         self.ambience_label = Label(
             text="Ambience:",
             font_size="24sp",
@@ -274,8 +275,10 @@ class AdventureApp(App):
         self.no_ambience.bind(on_press=self.turn_off_ambience)
         if self.ambience_on == True:
             self.yes_ambience.disabled = True
+            self.yes_ambience.background_color = [0, 1, 0, 1]
         else:
             self.no_ambience.disabled = True
+            self.no_ambience.background_color = [0, 1, 0, 1]
         
         self.effects_label = Label(
             text="Effects:",
@@ -298,8 +301,10 @@ class AdventureApp(App):
         self.no_effect.bind(on_press=self.turn_off_effect)
         if self.effects_on == True:
             self.yes_effect.disabled = True
+            self.yes_effect.background_color = [0, 1, 0, 1]
         else:
             self.no_effect.disabled = True
+            self.no_effect.background_color = [0, 1, 0, 1]
         
         
         self.layout.add_widget(self.images_label)
@@ -324,31 +329,43 @@ class AdventureApp(App):
         self.images_on = True
         self.yes_image.disabled = True
         self.no_image.disabled = False
-
+        self.no_image.background_color = [1, 1, 1, 1]
+        self.yes_image.background_color = [0, 1, 0, 1]
+        
     def turn_off_image(self, instance):
         self.images_on = False
         self.yes_image.disabled = False
         self.no_image.disabled = True
+        self.no_image.background_color = [0, 1, 0, 1]
+        self.yes_image.background_color = [1, 1, 1, 1]
 
     def turn_on_ambience(self, instance):
         self.ambience_on = True
         self.yes_ambience.disabled = True
         self.no_ambience.disabled = False
+        self.no_ambience.background_color = [1, 1, 1, 1]
+        self.yes_ambience.background_color = [0, 1, 0, 1]
 
     def turn_off_ambience(self, instance):
         self.ambience_on = False
         self.yes_ambience.disabled = False
         self.no_ambience.disabled = True
+        self.no_ambience.background_color = [0, 1, 0, 1]
+        self.yes_ambience.background_color = [1, 1, 1, 1]
 
     def turn_on_effect(self, instance):
         self.effects_on = True
         self.yes_effect.disabled = True
         self.no_effect.disabled = False
+        self.no_effect.background_color = [1, 1, 1, 1]
+        self.yes_effect.background_color = [0, 1, 0, 1]
 
     def turn_off_effect(self, instance):
         self.effects_on = False
         self.yes_effect.disabled = False
         self.no_effect.disabled = True
+        self.no_effect.background_color = [0, 1, 0, 0]
+        self.yes_effect.background_color = [1, 1, 1, 1]
         
     def quit(self, instance):
         self.stop()
