@@ -14,7 +14,7 @@ class AdventureApp(App):
     def build(self):
         self.ambience = SoundLoader.load("assets/ambience.mp3")
         if self.ambience:
-            self.ambience.volume = 0.8
+            self.ambience.volume = 1
             self.ambience.loop = True
             
         self.collapse = SoundLoader.load("assets/collapse.mp3")
@@ -178,13 +178,13 @@ class AdventureApp(App):
             text="On",
             font_size="24sp",
             size_hint=(0.15, 0.09),
-            pos_hint={'center_x': 0.4, 'center_y': 0.9}
+            pos_hint={'center_x': 0.5, 'center_y': 0.9}
         )
         self.no_image = Button(
             text="Off",
             font_size="24sp",
             size_hint=(0.15, 0.09),
-            pos_hint={'center_x': 0.6, 'center_y': 0.9}
+            pos_hint={'center_x': 0.8, 'center_y': 0.9}
         )
         self.yes_image.bind(on_press=self.turn_on_image)
         self.no_image.bind(on_press=self.turn_off_image)
@@ -202,13 +202,13 @@ class AdventureApp(App):
             text="On",
             font_size="24sp",
             size_hint=(0.15, 0.09),
-            pos_hint={'center_x': 0.4, 'center_y': 0.55}
+            pos_hint={'center_x': 0.5, 'center_y': 0.55}
         )
         self.no_ambience = Button(
             text="Off",
             font_size="24sp",
             size_hint=(0.15, 0.09),
-            pos_hint={'center_x': 0.6, 'center_y': 0.55}
+            pos_hint={'center_x': 0.8, 'center_y': 0.55}
         )
         self.yes_ambience.bind(on_press=self.turn_on_ambience)
         self.no_ambience.bind(on_press=self.turn_off_ambience)
@@ -226,13 +226,13 @@ class AdventureApp(App):
             text="On",
             font_size="24sp",
             size_hint=(0.15, 0.09),
-            pos_hint={'center_x': 0.4, 'center_y': 0.25}
+            pos_hint={'center_x': 0.5, 'center_y': 0.25}
         )
         self.no_effect = Button(
             text="Off",
             font_size="24sp",
             size_hint=(0.15, 0.09),
-            pos_hint={'center_x': 0.6, 'center_y': 0.25}
+            pos_hint={'center_x': 0.8, 'center_y': 0.25}
         )
         self.yes_effect.bind(on_press=self.turn_on_effect)
         self.no_effect.bind(on_press=self.turn_off_effect)
