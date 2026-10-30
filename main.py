@@ -107,9 +107,9 @@ class AdventureApp(App):
         
         self.gamename = Label(
             text="CAVE\nADVENTURES",
-            font_size="29sp",
+            font_size="32sp",
             text_size=(Window.width * 0.9, None),
-            pos_hint={'center_x': 0.5, 'center_y': 0.75},
+            pos_hint={'center_x': 0.5, 'center_y': 0.85},
             halign='center'
         )
         
@@ -158,7 +158,65 @@ class AdventureApp(App):
             self.ambience.play()
 
     def start_game(self, instance):
-        self.stop()
+        self.layout.clear_widgets()
+        self.fork_text = "You wake up in an unfamiliar place. You don't remember how you got here. you can vaguely recognise this place as a cave. You look around, you see the path ahead of you splits into three openings, you don't know where tht may lead you. The only other openings are 2 conveniently placed holes, that are lighting the cave. The holes are too high up and too small for you to get out of. Your only path is through one of the three openings ahead of you. Which one do you choose?"
+        self.fork_label = Label(
+            text="",
+            font_size="17sp",
+            size_hint=(1, 0,6),
+            pos_hint={'left': 0.05, 'top': 0.95},
+            text_size=self.size,
+            halign='left'
+        )
+        self.fork_image = Image(
+            source="assets/fork.jpeg",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.75},
+            allow_stretch=True,
+            keep_ratio=True
+        )
+        
+        self.layout.add_widget(self.fork_image)
+        self.layout.add_widget(self.fork_label)
+
+        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.fork_text, self.fork_label), 0.01)
+        schedule_time = len(self.fork_text) * 0.01 + 0.5
+        Clock.schedule_once(self.add_fork_options, schedule_time)
+
+    def add_fork_options(self, dt):
+        self.r_opening = Button(
+            text="Go right",
+            size_hint=(0.33, 0.4),
+            font_size="22sp",
+            pos_hint={'right': 1, 'center_y': 0.2},
+            text_size=self.size,
+            halign='right'
+        )
+        self.r_opening.bind(on_press=self.grapple_path)
+
+        self.l_opening = Button(
+            text="Go left",
+            size_hint=(0.33, 0.4),
+            font_size="22sp",
+            pos_hint={'left': 0, 'center_y': 0.2},
+            text_size=self.size,
+            halign='left'
+        )
+        self.l_opening.bind(on_press=self.long_path)
+
+        self.m_opening = Button(
+            text="Go middle",
+            font_size="22sp",
+            size_hint=(0.33, 0.4),
+            pos_hint={'center_x': 0.5, 'center_y': 0.2},
+            text_size=self.size,
+            halign='center'
+        )
+        self.m_opening.bind(on_press=self.big_hole)
+
+        self.layout.add_widget(l_opening)
+        self.layout.add_widget(r_opening)
+        self.layout.add_widget(m_opening)
             
     def option_menu(self, instance):
         self.layout.clear_widgets()
