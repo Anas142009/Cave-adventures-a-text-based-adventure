@@ -107,14 +107,14 @@ class AdventureApp(App):
         
         self.gamename = Label(
             text="CAVE\nADVENTURES",
-            font_size="30sp",
-            pos_hint={'center_x': 0.5, 'y': 0.8},
+            font_size="29sp",
+            pos_hint={'center_x': 0.5, 'center_y': 0.75},
         )
         
         self.start_button = Button(
             text="Start",
             font_size="24sp",
-            pos_hint={'center_x': 0.5, 'y': 0.4},
+            pos_hint={'center_x': 0.5, 'center_y': 0.4},
             size_hint=(0.65, 0.2)
         )
         self.UI_image = Image(
