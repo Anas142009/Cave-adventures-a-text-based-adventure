@@ -162,11 +162,11 @@ class AdventureApp(App):
         self.fork_text = "You wake up in an unfamiliar place. You don't remember how you got here. you can vaguely recognise this place as a cave. You look around, you see the path ahead of you splits into three openings, you don't know where tht may lead you. The only other openings are 2 conveniently placed holes, that are lighting the cave. The holes are too high up and too small for you to get out of. Your only path is through one of the three openings ahead of you. Which one do you choose?"
         self.fork_label = Label(
             text="",
-            font_size="17sp",
+            font_size="20sp",
             size_hint=(1, 0.6),
-            pos_hint={'x': 0.05, 'top': 0.95},
-            color=[0.5, 0.5, 0.5, 1],
-            text_size=(Window.width * 0.95, None),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=[0, 0, 0.8, 1],
+            text_size=(Window.width * 0.9, Window.height * 0.6),
             halign='left',
             valign='top'       
         )
@@ -179,12 +179,13 @@ class AdventureApp(App):
         )
         
         if self.images_on == True:
+            self.fork_image.opacity = 0.8
             self.layout.add_widget(self.fork_image)
         self.layout.add_widget(self.fork_label)
 
         self.char_index = 0
-        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.fork_text, self.fork_label), 0.03)
-        schedule_time = len(self.fork_text) * 0.03 + 0.5
+        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.fork_text, self.fork_label), 0.05)
+        schedule_time = len(self.fork_text) * 0.05 + 0.5
         Clock.schedule_once(self.add_fork_options, schedule_time)
 
     def add_fork_options(self, dt):
@@ -193,8 +194,9 @@ class AdventureApp(App):
             size_hint=(0.33, 0.4),
             font_size="22sp",
             pos_hint={'right': 1, 'center_y': 0.2},
-            text_size=self.size,
-            halign='right'
+            text_size=(Window.width * 0.33, Window.height * 0.4),
+            halign='right',
+            valign='middle'
         )
         self.r_opening.bind(on_press=self.grapple_path)
 
@@ -203,8 +205,9 @@ class AdventureApp(App):
             size_hint=(0.33, 0.4),
             font_size="22sp",
             pos_hint={'x': 0, 'center_y': 0.2},
-            text_size=self.size,
-            halign='left'
+            text_size=(Window.width * 0.33, Window.height * 0.4),
+            halign='left',
+            valign='middle'
         )
         self.l_opening.bind(on_press=self.long_path)
 
@@ -213,8 +216,9 @@ class AdventureApp(App):
             font_size="22sp",
             size_hint=(0.33, 0.4),
             pos_hint={'center_x': 0.5, 'center_y': 0.2},
-            text_size=self.size,
-            halign='center'
+            text_size=(Window.width * 0.33, Window.height * 0.4),
+            halign='center',
+            valign='middle'
         )
         self.m_opening.bind(on_press=self.big_hole)
 
