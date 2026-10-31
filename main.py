@@ -163,9 +163,9 @@ class AdventureApp(App):
         self.fork_label = Label(
             text="",
             font_size="17sp",
-            size_hint=(1, 0,6),
+            size_hint=(1, 0.6),
             pos_hint={'left': 0.05, 'top': 0.95},
-            text_size=self.size,
+            text_size=(Window.width * 0.95, None),
             halign='left'
         )
         self.fork_image = Image(
@@ -176,7 +176,8 @@ class AdventureApp(App):
             keep_ratio=True
         )
         
-        self.layout.add_widget(self.fork_image)
+        if images_on == True:
+            self.layout.add_widget(self.fork_image)
         self.layout.add_widget(self.fork_label)
 
         Clock.schedule_interval(lambda dt: self.typewrite(dt, self.fork_text, self.fork_label), 0.01)
@@ -214,9 +215,9 @@ class AdventureApp(App):
         )
         self.m_opening.bind(on_press=self.big_hole)
 
-        self.layout.add_widget(l_opening)
-        self.layout.add_widget(r_opening)
-        self.layout.add_widget(m_opening)
+        self.layout.add_widget(self.l_opening)
+        self.layout.add_widget(self.r_opening)
+        self.layout.add_widget(self.m_opening)
             
     def option_menu(self, instance):
         self.layout.clear_widgets()
