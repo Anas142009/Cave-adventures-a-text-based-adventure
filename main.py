@@ -8,7 +8,7 @@ from kivy.uix.image import Image
 from kivy.core.audio import SoundLoader
 from kivy.uix.floatlayout import FloatLayout
 from kivy.core.window import Window
-
+from kivy.utils import get_color_from_hex
 
 class AdventureApp(App):
     def build(self):
@@ -112,6 +112,7 @@ class AdventureApp(App):
         self.disclaimer_label.text = self.disc_text
         self.type_write.cancel()
         self.understood.cancel()
+        self.skip_button.disabled = True
         
     def add_understand(self, dt):
         self.layout.add_widget(self.understand_button)
@@ -121,10 +122,11 @@ class AdventureApp(App):
         
         self.gamename = Label(
             text="CAVE\nADVENTURES",
-            font_size="32sp",
+            font_size="40sp",
             text_size=(Window.width * 0.9, None),
-            pos_hint={'center_x': 0.5, 'center_y': 0.85},
-            halign='center'
+            pos_hint={'center_x': 0.5, 'center_y': 0.8},
+            halign='center',
+            color=[1, 1, 1, 1]
         )
         
         self.start_button = Button(
@@ -173,13 +175,13 @@ class AdventureApp(App):
 
     def start_game(self, instance):
         self.layout.clear_widgets()
-        self.fork_text = "You wake up in an unfamiliar place. You don't remember how you got here. you can vaguely recognise this place as a cave. You look around, you see the path ahead of you splits into three openings, you don't know where tht may lead you. The only other openings are 2 conveniently placed holes, that are lighting the cave. The holes are too high up and too small for you to get out of. Your only path is through one of the three openings ahead of you. Which one do you choose?"
+        self.fork_text = "You wake up in an unfamiliar place. You don't remember how you got here. you can vaguely recognise this place as a cave. You look around, you see the path ahead of you splits into three openings, you don't know where that may lead. The only other openings are two conveniently placed holes, that are lighting the cave. The holes are too high up and too small for you to get out of. Your only path is through one of the three openings ahead of you. Which one do you choose?"
         self.fork_label = Label(
             text="",
-            font_size="20sp",
+            font_size="21sp",
             size_hint=(1, 0.6),
             pos_hint={'x': 0, 'top': 0.95},
-            color=[0.4, 0.2, 0.8, 1],
+            color=get_color_from_hex("8D6844"),
             text_size=(Window.width * 0.9, Window.height * 0.6),
             halign='left',
             valign='top'       
@@ -191,15 +193,23 @@ class AdventureApp(App):
             allow_stretch=True,
             keep_ratio=False
         )
-        
+        self.text_background = Image(
+            source="assets/Text_background.png",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.75},
+            allow_stretch=True,
+            keep_ratio=False
+        )
         if self.images_on == True:
-            self.fork_image.opacity = 0.8
+            self.fork_image.opacity = 1
             self.layout.add_widget(self.fork_image)
+        self.text_background.opacity = 1
+        self.layout.add_widget(self.text_background)
         self.layout.add_widget(self.fork_label)
 
         self.char_index = 0
         Clock.schedule_interval(lambda dt: self.typewrite(dt, self.fork_text, self.fork_label), 0.045)
-        schedule_time = len(self.fork_text) * 0.05 + 0.5
+        schedule_time = len(self.fork_text) * 0.05
         Clock.schedule_once(self.add_fork_options, schedule_time)
 
     def add_fork_options(self, dt):
