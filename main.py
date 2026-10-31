@@ -86,13 +86,13 @@ class AdventureApp(App):
             text_size=(Window.width * 0.9, None), # Prevents text from stretching off screen
             halign='center'
         )
-        self.layout.add_widget(self.disclaimer_label)
-        self.char_index = 0
-        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.05)
-        schedule_time = len(self.disc_text) * 0.05 + 0.5
-        Clock.schedule_once(self.add_understand, schedule_time)
-
-    def add_understand(self, dt):
+        self.skip_button = Button(
+            text="",
+            size_hint=(1, 0.9),
+            pos_hint={'center_x': 0.5, 'top': 1}
+        )
+        self.skip_button.opacity = 0
+        self.skip_button.bind(on_press=self.skip_disc)
         self.understand_button = Button(
             text="I understand",
             font_size="24sp",
@@ -100,6 +100,20 @@ class AdventureApp(App):
             size_hint=(1, 0.1),
         )
         self.understand_button.bind(on_press=self.main_menu)
+        self.layout.add_widget(self.skip_button)
+        self.layout.add_widget(self.disclaimer_label)
+        self.char_index = 0
+        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.05)
+        schedule_time = len(self.disc_text) * 0.05 + 0.5
+        Clock.schedule_once(self.add_understand, schedule_time)
+
+    def skip_disc(self, instance):
+        self.layout.add_widget(self.understand_button)
+        self.disclaimer_label.text = self.disc_text
+        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.05).cancel()
+        Clock.schedule_once(self.add_understand, schedule_time).cancel()
+        
+    def add_understand(self, dt):
         self.layout.add_widget(self.understand_button)
         
     def main_menu(self, instance):
