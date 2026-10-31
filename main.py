@@ -175,7 +175,7 @@ class AdventureApp(App):
             size_hint=(1, 0.6),
             pos_hint={'center_x': 0.5, 'center_y': 0.75},
             allow_stretch=True,
-            keep_ratio=True
+            keep_ratio=False
         )
         
         if self.images_on == True:
