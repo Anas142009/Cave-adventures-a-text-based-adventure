@@ -364,7 +364,7 @@ class AdventureApp(App):
         self.effects_on = False
         self.yes_effect.disabled = False
         self.no_effect.disabled = True
-        self.no_effect.background_color = [0, 1, 0, 0]
+        self.no_effect.background_color = [0, 1, 0, 1]
         self.yes_effect.background_color = [1, 1, 1, 1]
         
     def quit(self, instance):
