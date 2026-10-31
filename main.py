@@ -103,15 +103,15 @@ class AdventureApp(App):
         self.layout.add_widget(self.skip_button)
         self.layout.add_widget(self.disclaimer_label)
         self.char_index = 0
-        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.05)
+        self.type_write = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.05)
         schedule_time = len(self.disc_text) * 0.05 + 0.5
-        Clock.schedule_once(self.add_understand, schedule_time)
+        self.understood = Clock.schedule_once(self.add_understand, schedule_time)
 
     def skip_disc(self, instance):
         self.layout.add_widget(self.understand_button)
         self.disclaimer_label.text = self.disc_text
-        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.05).cancel()
-        Clock.schedule_once(self.add_understand, schedule_time).cancel()
+        self.type_write.cancel()
+        self.understood.cancel()
         
     def add_understand(self, dt):
         self.layout.add_widget(self.understand_button)
@@ -179,7 +179,7 @@ class AdventureApp(App):
             font_size="20sp",
             size_hint=(1, 0.6),
             pos_hint={'x': 0, 'top': 0.95},
-            color=[0, 0, 0.8, 1],
+            color=[0.4, 0.2, 0.8, 1],
             text_size=(Window.width * 0.9, Window.height * 0.6),
             halign='left',
             valign='top'       
@@ -198,7 +198,7 @@ class AdventureApp(App):
         self.layout.add_widget(self.fork_label)
 
         self.char_index = 0
-        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.fork_text, self.fork_label), 0.05)
+        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.fork_text, self.fork_label), 0.045)
         schedule_time = len(self.fork_text) * 0.05 + 0.5
         Clock.schedule_once(self.add_fork_options, schedule_time)
 
