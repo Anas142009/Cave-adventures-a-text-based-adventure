@@ -164,9 +164,11 @@ class AdventureApp(App):
             text="",
             font_size="17sp",
             size_hint=(1, 0.6),
-            pos_hint={'left': 0.05, 'top': 0.95},
+            pos_hint={'x': 0.05, 'top': 0.95},
+            color=[0.5, 0.5, 0.5, 1],
             text_size=(Window.width * 0.95, None),
-            halign='left'
+            halign='left',
+            valign='top'       
         )
         self.fork_image = Image(
             source="assets/fork.jpeg",
@@ -180,8 +182,9 @@ class AdventureApp(App):
             self.layout.add_widget(self.fork_image)
         self.layout.add_widget(self.fork_label)
 
-        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.fork_text, self.fork_label), 0.01)
-        schedule_time = len(self.fork_text) * 0.01 + 0.5
+        self.char_index = 0
+        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.fork_text, self.fork_label), 0.03)
+        schedule_time = len(self.fork_text) * 0.03 + 0.5
         Clock.schedule_once(self.add_fork_options, schedule_time)
 
     def add_fork_options(self, dt):
@@ -199,7 +202,7 @@ class AdventureApp(App):
             text="Go left",
             size_hint=(0.33, 0.4),
             font_size="22sp",
-            pos_hint={'left': 0, 'center_y': 0.2},
+            pos_hint={'x': 0, 'center_y': 0.2},
             text_size=self.size,
             halign='left'
         )
@@ -218,7 +221,16 @@ class AdventureApp(App):
         self.layout.add_widget(self.l_opening)
         self.layout.add_widget(self.r_opening)
         self.layout.add_widget(self.m_opening)
-            
+
+    def big_hole(self, instance):
+        self.stop()
+
+    def grapple_path(self, instance):
+        self.stop()
+
+    def long_path(self, instance):
+        self.stop()
+        
     def option_menu(self, instance):
         self.layout.clear_widgets()
         self.ambience.stop()
