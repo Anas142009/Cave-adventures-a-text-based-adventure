@@ -176,7 +176,7 @@ class AdventureApp(App):
             keep_ratio=True
         )
         
-        if images_on == True:
+        if self.images_on == True:
             self.layout.add_widget(self.fork_image)
         self.layout.add_widget(self.fork_label)
 
