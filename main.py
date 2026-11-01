@@ -65,6 +65,7 @@ class AdventureApp(App):
         self.effects_on = True
         self.havegrapple = False
         self.brown = get_color_from_hex("B3865B")
+        self.started = False
         #)
         Clock.schedule_once(self.loadlogo, 3)
         return self.layout
@@ -113,6 +114,7 @@ class AdventureApp(App):
         self.type_write = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.05)
         schedule_time = len(self.disc_text) * 0.05 + 0.5
         self.understood = Clock.schedule_once(self.add_understand, schedule_time)
+        
 
     def skip_disc(self, instance):
         if self.char_index < len(self.disc_text):
@@ -208,7 +210,11 @@ class AdventureApp(App):
         self.skip_button.pos_hint = {'right': 1, 'center_y': 0.425}
         self.skip_button.opacity = 0.5
         
-        self.fork_text = "You wake up in an unfamiliar place. You don't remember how you got here. you can vaguely recognise this place as a cave. You look around, you see the path ahead of you splitting into three openings, you don't know where they may lead. The only other openings are two conveniently placed holes, that are lighting the cave. The holes are too high up and too small for you to get out of. Your only path is through one of the three openings ahead of you. Which one do you choose?"
+        if self.started == False:
+            self.fork_text = "You wake up in an unfamiliar place. You don't remember how you got here. you can vaguely recognise this place as a cave. You look around, you see the path ahead of you splitting into three openings, you don't know where they may lead. The only other openings are two conveniently placed holes, that are lighting the cave. The holes are too high up and too small for you to get out of. Your only path is through one of the three openings ahead of you. Which one do you choose?"
+            self.started = True
+        else:
+            self.fork_text = "You're back at the three openings. How do you proceed?"
         self.fork_label = Label(
             text="",
             font_size="21sp",
@@ -250,7 +256,7 @@ class AdventureApp(App):
         self.type_write_fork = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.fork_text, self.fork_label), 0.045)
         schedule_time = len(self.fork_text) * 0.05
         self.option_fork = Clock.schedule_once(self.add_fork_options, schedule_time)
-
+       
     def skip_fork(self, instance):
          if self.char_index < len(self.disc_text):
             self.fork_label.text = self.fork_text
@@ -307,9 +313,9 @@ class AdventureApp(App):
     def big_hole(self, instance):
         self.layout.clear_widgets()
         if self.havegrapple == True:
-            self.hole_text = "You walk forward.\nA giant pit stops you in your path.\nYour grapple gun might get you over it, do you want to use it?"
+            self.hole_text = "You walk straight forward.\nA giant pit stops you in your path.\nYour grapple gun might get you over it, do you want to use it?"
         else:
-            self.hole_text = "You walk forward.\nA giant pit stops you in your path.\nYou can't find a way to get across."
+            self.hole_text = "You walk straight forward.\nA giant pit stops you in your path.\nYou can't find a way to get across."
 
         self.pit_label = Label(
             text="",
@@ -321,23 +327,53 @@ class AdventureApp(App):
             halign='left',
             bold=True,
             valign='top'       
-         )
+        )
         self.pit_image = Image(
             source="assets/pit.png",
             size_hint=(1, 0.6),
             pos_hint={'center_x': 0.5, 'center_y': 0.7},
             allow_stretch=True,
             keep_ratio=False
-         ) 
+        ) 
         
-        
+        self.text_background.opacity = 0.8
         self.char_index = 0
         if self.images_on == True:
             self.layout.add_widget(self.pit_image)
-            self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.text_background)
         self.layout.add_widget(self.pit_label)
-        self.type_write_pit = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.hole_text, self.pit_label), 0.045)
-         
+        self.layout.add_widget(self.skip_button)
+        self.type_write_pit = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.hole_text, self.pit_label), 0.05)
+        schedule_time = len(self.hole_text) * 0.05 + 2.8
+        self.add_pit_options = Clock.schedule_once(self.pit_options, schedule_time)
+        pause_timing = len("You walk straight forward.") * 0.05 + 0.13
+        self.pause_type_write = Clock.schedule_once(lambda dt:  self.pause_typewrite(dt, self.type_write_pit, 1.5), pause_timing)
+        pause_timing2 = len("You walk straight forward.\nA giant pit stops you on yoir path.") * 0.05 + 1.8
+        self.pause_type_write2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_pit, 1), pause_timing2)
+        
+    def pit_options(self, dt):
+        self.return_button = Button(
+            text="Go back",
+            size_hint=(1, 0.2),
+            pos_hint={'center_x': 0.5, 'center_y':0.1},
+            font_size="24sp",
+            background_color=self.brown
+        )
+        self.return_button.bind(on_press=self.start_game)
+        self.grapple_across = Button(
+            text="Use the grapple gun",
+            size_hint=(1,  0.2),
+            pos_hint={'center_x': 0.5, 'center_y': 0.3},
+            font_size="24sp",
+            background_color=self.brown
+        )
+        
+        if self.havegrapple == True:
+            self.layout.add_widget(self.return_button)
+            self.layout.add_widget(self.grapple_across)
+        else:
+            self.layout.add_widget(self.return_button)
+                   
     def grapple_path(self, instance):
         self.stop()
 
@@ -444,11 +480,17 @@ class AdventureApp(App):
         self.layout.add_widget(self.yes_effect)
         self.layout.add_widget(self.no_effect)
         
+    def  pause_typewrite(self, dt, typewrite_function, duration):
+        typewrite_function.cancel()
+        Clock.schedule_once(typewrite_function, duration)
     def typewrite(self, dt, target_text, label):
         if self.char_index < len(target_text):
             label.text += target_text[self.char_index] #The [] act as an index to determine which character to write.
             self.char_index += 1 #The addition makes it move from one character to the next.
         else:
+            if self.skip_button.disabled == False:
+                self.skip_button.disabled = True
+                self.skip_button.opacity = 0
             return False # Returning False automatically stops the interval loop
 
     def turn_on_image(self, instance):
