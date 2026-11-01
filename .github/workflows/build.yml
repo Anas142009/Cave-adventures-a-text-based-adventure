@@ -18,27 +18,17 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11' # Change to your preferred Python version
-    
-    - name: Install Software OpenGL (MESA) for Headless Cloud Testing
-      shell: bash
-      run: |
-        curl -L -o mesa.zip https://github.com
-        unzip mesa.zip -d mesa_files
-        # Copy the software OpenGL driver to the system folders so Kivy can see it
-        cp mesa_files/x64/opengl32.dll C:/Windows/System32/
-        cp mesa_files/x64/libglapi.dll C:/Windows/System32/
-    
+  
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel
         pip install pyinstaller
         pip install kivy[base]
         pip install kivy_deps.sdl2 kivy_deps.glew
-        python -c "from kivy_deps import sdl2, glew; print('kivy_deps successfully verified!')"
-
+        
     - name: Compile Script to EXE
       run: |
-        pyinstaller Cave_adventures.spec
+        pyinstaller --onefile --noconsole --collect-all kivy main.py
         # Replace 'main.py' with the name of your script.
         # --onefile packages everything into a single .exe
         # --noconsole hides the command prompt window if it's a GUI app
@@ -47,4 +37,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: Cave-Adventures
-        path: dist/main.exe  # PyInstaller outputs the final file inside the 'dist' folder
+        path: dist/Cave_adventures.exe  # PyInstaller outputs the final file inside the 'dist' folder
