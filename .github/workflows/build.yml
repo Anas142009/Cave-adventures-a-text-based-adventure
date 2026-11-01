@@ -18,7 +18,16 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11' # Change to your preferred Python version
-
+    
+    - name: Install Software OpenGL (MESA) for Headless Cloud Testing
+      shell: bash
+      run: |
+        curl -L -o mesa.zip https://github.com
+        unzip mesa.zip -d mesa_files
+        # Copy the software OpenGL driver to the system folders so Kivy can see it
+        cp mesa_files/x64/opengl32.dll C:/Windows/System32/
+        cp mesa_files/x64/libglapi.dll C:/Windows/System32/
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip setuptools wheel
