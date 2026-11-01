@@ -28,7 +28,7 @@ jobs:
 
     - name: Compile Script to EXE
       run: |
-        pyinstaller --onefile --noconsole Cave_adventures.spec
+        pyinstaller Cave_adventures.spec
         # Replace 'main.py' with the name of your script.
         # --onefile packages everything into a single .exe
         # --noconsole hides the command prompt window if it's a GUI app
