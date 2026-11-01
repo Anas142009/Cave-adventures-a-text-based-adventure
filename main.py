@@ -1,5 +1,11 @@
 __version__ = "0.1.0"
+import os
+import platform
 
+# Force Windows environments to use ANGLE/DirectX to prevent OpenGL 1.1 crashes
+if platform.system() == 'Windows':
+    os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
+    
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.uix.button import Button
