@@ -27,6 +27,9 @@ jobs:
         pip install kivy_deps.sdl2 kivy_deps.glew
         
     - name: Compile Script to EXE
+      env:
+        KIVY_GL_BACKEND: angle_sdl2
+        KIVY_NO_CONSOLELOG: '1'
       run: |
         pyinstaller --onefile --noconsole --name="Cave_adventures" --hidden-import=kivy.core.window.window_sdl2 --hidden-import=kivy.core.text.text_sdl2 main.py
         # Replace 'main.py' with the name of your script.
