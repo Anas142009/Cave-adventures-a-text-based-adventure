@@ -28,7 +28,7 @@ jobs:
         
     - name: Compile Script to EXE
       run: |
-        pyinstaller --onefile --noconsole --collect-all kivy main.py
+        pyinstaller --onefile --noconsole --name="Cave_adventures" --hidden-import=kivy.core.window.window_sdl2 --hidden-import=kivy.core.text.text_sdl2 main.py
         # Replace 'main.py' with the name of your script.
         # --onefile packages everything into a single .exe
         # --noconsole hides the command prompt window if it's a GUI app
