@@ -21,10 +21,11 @@ jobs:
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
+        python -m pip install --upgrade pip setuptools wheel
         pip install pyinstaller
-        # If your script has other dependencies, install them here:
-        # pip install -r requirements.txt
+        pip install kivy[base]
+        pip install kivy_deps.sdl2 kivy_deps.glew
+        python -c "from kivy_deps import sdl2, glew; print('kivy_deps successfully verified!')"
 
     - name: Compile Script to EXE
       run: |
