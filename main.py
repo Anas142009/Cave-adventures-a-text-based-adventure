@@ -58,9 +58,14 @@ class AdventureApp(App):
             self.vic_ambience2.loop = True
 
         self.layout = FloatLayout()
-        self.images_on = True # default value
+        
+        #(set all default values here:-
+        self.images_on = True 
         self.ambience_on = True
         self.effects_on = True
+        self.havegrapple = False
+        self.brown = get_color_from_hex("B3865B")
+        #)
         Clock.schedule_once(self.loadlogo, 3)
         return self.layout
         
@@ -87,11 +92,13 @@ class AdventureApp(App):
             halign='center'
         )
         self.skip_button = Button(
-            text="",
-            size_hint=(1, 0.6),
-            pos_hint={'center_x': 0.5, 'top': 1}
+            text="skip",
+            size_hint=(0.1, 0.05),
+            pos_hint={'right': 1, 'center_y': 0.25},
+            background_normal="",
+            background_color=self.brown
         )
-        self.skip_button.opacity = 0
+        self.skip_button.opacity = 0.5
         self.skip_button.bind(on_press=self.skip_disc)
         self.understand_button = Button(
             text="I understand",
@@ -114,9 +121,11 @@ class AdventureApp(App):
             self.type_write.cancel()
             self.understood.cancel()
             self.skip_button.disabled = True
+            self.skip_button.opacity = 0
         else:
             self.skip_button.disabled = True
-        
+            self.skip_button.opacity = 0
+            
     def add_understand(self, dt):
         self.layout.add_widget(self.understand_button)
         
@@ -195,7 +204,10 @@ class AdventureApp(App):
 
     def start_game(self, instance):
         self.layout.clear_widgets()
-        self.havegrapple = False
+        
+        self.skip_button.pos_hint = {'right': 1, 'center_y': 0.425}
+        self.skip_button.opacity = 0.5
+        
         self.fork_text = "You wake up in an unfamiliar place. You don't remember how you got here. you can vaguely recognise this place as a cave. You look around, you see the path ahead of you splitting into three openings, you don't know where they may lead. The only other openings are two conveniently placed holes, that are lighting the cave. The holes are too high up and too small for you to get out of. Your only path is through one of the three openings ahead of you. Which one do you choose?"
         self.fork_label = Label(
             text="",
@@ -225,14 +237,15 @@ class AdventureApp(App):
         self.skip_button.disabled = False
         self.skip_button.unbind(on_press=self.skip_disc)
         self.skip_button.bind(on_press=self.skip_fork)
-        self.layout.add_widget(self.skip_button)
+        
         if self.images_on == True:
             self.fork_image.opacity = 1
             self.layout.add_widget(self.fork_image)
         self.text_background.opacity = 1
         self.layout.add_widget(self.text_background)
         self.layout.add_widget(self.fork_label)
-
+        self.layout.add_widget(self.skip_button)
+        
         self.char_index = 0
         self.type_write_fork = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.fork_text, self.fork_label), 0.045)
         schedule_time = len(self.fork_text) * 0.05
@@ -244,29 +257,34 @@ class AdventureApp(App):
             self.type_write_fork.cancel()
             self.option_fork.cancel()
             self.skip_button.disabled = True
+            self.skip_button.opacity = 0
+            self.option_fork = Clock.schedule_once(self.add_fork_options, 0)
          else:
             self.skip_button.disabled = True
+            self.skip_button.opacity = 0
             
     def add_fork_options(self, dt):
         self.r_opening = Button(
-            text="Go right",
+            text="Go right -->",
             size_hint=(0.33, 0.4),
             font_size="22sp",
             pos_hint={'right': 1, 'center_y': 0.2},
             text_size=(Window.width * 0.33, Window.height * 0.4),
             halign='right',
-            valign='middle'
+            valign='middle',
+            background_color=self.brown
         )
         self.r_opening.bind(on_press=self.grapple_path)
 
         self.l_opening = Button(
-            text="Go left",
+            text="<-- Go left",
             size_hint=(0.33, 0.4),
             font_size="22sp",
             pos_hint={'x': 0, 'center_y': 0.2},
             text_size=(Window.width * 0.33, Window.height * 0.4),
             halign='left',
-            valign='middle'
+            valign='middle',
+            background_color=self.brown
         )
         self.l_opening.bind(on_press=self.long_path)
 
@@ -277,7 +295,8 @@ class AdventureApp(App):
             pos_hint={'center_x': 0.5, 'center_y': 0.2},
             text_size=(Window.width * 0.33, Window.height * 0.4),
             halign='center',
-            valign='middle'
+            valign='middle',
+            background_color=self.brown
         )
         self.m_opening.bind(on_press=self.big_hole)
 
@@ -287,7 +306,7 @@ class AdventureApp(App):
 
     def big_hole(self, instance):
         self.layout.clear_widgets()
-        if havegrapple == True:
+        if self.havegrapple == True:
             self.hole_text = "You walk forward.\nA giant pit stops you in your path.\nYour grapple gun might get you over it, do you want to use it?"
         else:
             self.hole_text = "You walk forward.\nA giant pit stops you in your path.\nYou can't find a way to get across."
@@ -303,8 +322,18 @@ class AdventureApp(App):
             bold=True,
             valign='top'       
          )
-         
-         
+        self.pit_image = Image(
+            source="assets/pit.png",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+         ) 
+        
+        
+        self.char_index = 0
+        if self.images_on == True:
+            self.layout.add_widget(self.pit_image)            self.layout.add_widget(self.text_background)
         self.layout.add_widget(self.pit_label)
         self.type_write_pit = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.hole_text, self.pit_label), 0.045)
          
