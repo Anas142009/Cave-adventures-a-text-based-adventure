@@ -333,7 +333,8 @@ class AdventureApp(App):
         
         self.char_index = 0
         if self.images_on == True:
-            self.layout.add_widget(self.pit_image)            self.layout.add_widget(self.text_background)
+            self.layout.add_widget(self.pit_image)
+            self.layout.add_widget(self.text_background)
         self.layout.add_widget(self.pit_label)
         self.type_write_pit = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.hole_text, self.pit_label), 0.045)
          
