@@ -247,7 +247,8 @@ class AdventureApp(App):
             keep_ratio=False
         )
         self.skip_button.disabled = False
-        self.skip_button.unbind(on_press=self.skip_disc)
+        for uid in list(self.skip_button._events.get(event_name, {}).keys()):
+            self.skip_button.unbind_uid(event_name, uid)
         self.skip_button.bind(on_press=self.skip_fork)
         
         if self.images_on == True:
