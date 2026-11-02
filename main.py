@@ -2,9 +2,11 @@ __version__ = "0.1.0"
 import os
 import platform
 
+os.environ['KIVY_CLOCK'] = 'interrupt'
 # Force Windows environments to use ANGLE/DirectX to prevent OpenGL 1.1 crashes
 if platform.system() == 'Windows':
     os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
+    
     
 from kivy.app import App
 from kivy.clock import Clock
@@ -48,6 +50,11 @@ class AdventureApp(App):
             self.grapple.volume = 1
             self.grapple.loop = False
 
+        self.grapple_back = SoundLoader.load("assets/grapple_back.mp3")        
+        if self.grapple_back:
+            self.grapple_back.volume = 1
+            self.grapple_back.loop = False
+            
         self.impact = SoundLoader.load("assets/hit_ground.mp3")
         if self.impact:
             self.impact.volume = 1
@@ -72,6 +79,10 @@ class AdventureApp(App):
         self.havegrapple = False
         self.brown = get_color_from_hex("B3865B")
         self.started = False
+        self.right_grnd_brkn = False
+        self.skipped_disc = False
+        self.skipped_pit = False
+        self.skipped_right = False
         #)
         Clock.schedule_once(self.loadlogo, 3)
         return self.layout
@@ -107,6 +118,7 @@ class AdventureApp(App):
         )
         self.skip_button.opacity = 0.5
         self.skip_button.bind(on_press=self.skip_disc)
+        self.skipped_disc = True
         self.understand_button = Button(
             text="I understand",
             font_size="24sp",
@@ -114,13 +126,14 @@ class AdventureApp(App):
             size_hint=(1, 0.1),
         )
         self.understand_button.bind(on_press=self.main_menu)
+        
         self.layout.add_widget(self.skip_button)
         self.layout.add_widget(self.disclaimer_label)
         self.char_index = 0
         self.type_write = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.05)
         schedule_time = len(self.disc_text) * 0.05 + 0.5
         self.understood = Clock.schedule_once(self.add_understand, schedule_time)
-        
+         
 
     def skip_disc(self, instance):
         if self.char_index < len(self.disc_text):
@@ -247,8 +260,12 @@ class AdventureApp(App):
             keep_ratio=False
         )
         self.skip_button.disabled = False
-        for uid in list(self.skip_button._events.get(event_name, {}).keys()):
-            self.skip_button.unbind_uid(event_name, uid)
+        if self.skipped_disc == True and self.skipped_pit == False and self.skipped_right == False:
+            self.skip_button.unbind(on_press=self.skip_disc)
+        elif self.skipped_pit == True and self.skipped_right == False:
+            self.skip_button.unbind(on_press=self.skip_pit)
+        else:
+            self.skip_button.unbind(on_press=self.skip_right)
         self.skip_button.bind(on_press=self.skip_fork)
         
         if self.images_on == True:
@@ -345,19 +362,41 @@ class AdventureApp(App):
         
         self.text_background.opacity = 0.8
         self.char_index = 0
+        self.skip_button.unbind(on_press=self.skip_fork)
+        self.skip_button.bind(on_press=self.skip_pit)
+        self.skip_button.opacity = 0.5
+        self.skip_button.disabled = False
+        self.skipped_pit = True
+        self.skipped_right = False
+  
         if self.images_on == True:
             self.layout.add_widget(self.pit_image)
         self.layout.add_widget(self.text_background)
         self.layout.add_widget(self.pit_label)
         self.layout.add_widget(self.skip_button)
-        self.type_write_pit = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.hole_text, self.pit_label), 0.05)
-        schedule_time = len(self.hole_text) * 0.05 + 2.8
-        self.add_pit_options = Clock.schedule_once(self.pit_options, schedule_time)
-        pause_timing = len("You walk straight forward.") * 0.05 + 0.13
-        self.pause_type_write = Clock.schedule_once(lambda dt:  self.pause_typewrite(dt, self.type_write_pit, 1.5), pause_timing)
-        pause_timing2 = len("You walk straight forward.\nA giant pit stops you on yoir path.") * 0.05 + 1.8
-        self.pause_type_write2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_pit, 1), pause_timing2)
         
+        self.type_write_pit = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.hole_text, self.pit_label), 0.05)
+        schedule_time = len(self.hole_text) * 0.05 + 1.8
+        self.add_pit_options = Clock.schedule_once(self.pit_options, schedule_time)
+        pause_timing = len("You walk straight forward.") * 0.05 - 0.05
+        self.pause_type_write = Clock.schedule_once(lambda dt:  self.pause_typewrite(dt, self.type_write_pit, 1), pause_timing)
+        pause_timing2 = len("You walk straight forward.\nA giant pit stops you on yoir path.") * 0.05 + 0.85
+        self.pause_type_write2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_pit, 0.5), pause_timing2)
+        
+    def skip_pit(self, instance):
+         if self.char_index < len(self.hole_text):
+            self.pit_label.text = self.hole_text
+            self.type_write_pit.cancel()
+            self.add_pit_options.cancel()
+            self.pause_type_write.cancel()
+            self.pause_type_write2.cancel()
+            self.skip_button.disabled = True
+            self.skip_button.opacity = 0
+            self.option_fork = Clock.schedule_once(self.pit_options, 0)
+         else:
+            self.skip_button.disabled = True
+            self.skip_button.opacity = 0
+    
     def pit_options(self, dt):
         self.return_button = Button(
             text="Go back",
@@ -382,8 +421,55 @@ class AdventureApp(App):
             self.layout.add_widget(self.return_button)
                    
     def grapple_path(self, instance):
-        self.stop()
-
+        self.layout.clear_widgets()
+        if self.right_grnd_brkn == True:
+            self.right_text = "You walk back through the right. You reach the ground that was once there. You can't see the bottom of the ground where it once was. You can't think of a way across"
+        else:
+            self.right_text = "You go through the right opening. A few steps in, the light from the fork behind you is almost dim. You can see a faint light from the end of this opening, you decide to follow it. Suddenly, the ground below you starts to shake and crack. You have to act fast. What do you do?"
+        self.right_label = Label(
+            text="",
+            font_size="22sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=self.brown,
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        
+        self.right_image = Image(
+            source="assets/Cracking.png",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+        )
+        
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.right_label)
+        
+        self.char_index = 0
+        self.type_write_right = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.right_text, self.right_label), 0.05)
+        pause_timing = len("You go through the right opening.") * 0.05 - 0.05
+        if not self.right_grnd_brkn:
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_right, 0.5), pause_timing)
+        pause2_timing = len("You go through the right opening. A few steps in, the light from the fork behind you is almost dim.") * 0.05 + 0.1
+        if not self.right_grnd_brkn:
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_right, 0.5), pause2_timing)
+        pause3_timing = len("You go through the right opening. A few steps in, the light from the fork behind you is almost dim. You can see a faint light at the end of the opening, you decide to follow it. Suddenly,") * 0.05 + 0.25
+        if not self.right_grnd_brkn:
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_right, 1.5), pause3_timing)
+            Clock.schedule_once(self.start_cracking, pause3_timing)
+            
+    def start_cracking(self, dt):
+        if self.images_on == True:
+            self.right_image.opacity = 0
+            self.layout.add_widget(self.right_image, index = 2)
+            Clock.schedule_interval(lambda dt: self.image_appear(dt, self.right_image, 1), 0.1)
+        if self.effects_on == True:
+            self.crack.play()
+        
     def long_path(self, instance):
         self.stop()
         
@@ -500,6 +586,12 @@ class AdventureApp(App):
                 self.skip_button.opacity = 0
             return False # Returning False automatically stops the interval loop
 
+     def image_appear(self, dt, target_image, target_opacity):
+        if target_image.opacity < target_opacity:
+            target_image.opacity += 0.1
+        else:
+            return False
+                
     def turn_on_image(self, instance):
         self.images_on = True
         self.yes_image.disabled = True
