@@ -586,7 +586,7 @@ class AdventureApp(App):
                 self.skip_button.opacity = 0
             return False # Returning False automatically stops the interval loop
 
-     def image_appear(self, dt, target_image, target_opacity):
+    def image_appear(self, dt, target_image, target_opacity):
         if target_image.opacity < target_opacity:
             target_image.opacity += 0.1
         else:
