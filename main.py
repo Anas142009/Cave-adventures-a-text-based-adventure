@@ -32,7 +32,7 @@ class AdventureApp(App):
 
         self.crack = SoundLoader.load("assets/crack_sound.mp3")
         if self.crack:
-            self.crack.volume = 1
+            self.crack.volume = 0.8
             self.crack.loop = True
 
         self.death_sound = SoundLoader.load("assets/Death.mp3")
@@ -457,16 +457,16 @@ class AdventureApp(App):
         pause2_timing = len("You go through the right opening. A few steps in, the light from the fork behind you is almost dim.") * 0.05 + 0.1
         if not self.right_grnd_brkn:
             Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_right, 0.5), pause2_timing)
-        pause3_timing = len("You go through the right opening. A few steps in, the light from the fork behind you is almost dim. You can see a faint light at the end of the opening, you decide to follow it. Suddenly,") * 0.05 + 0.25
+        pause3_timing = len("You go through the right opening. A few steps in, the light from the fork behind you is almost dim. You can see a faint light from the end of this opening, you decide to follow it. Suddenly,") * 0.05 + 0.25
         if not self.right_grnd_brkn:
-            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_right, 1.5), pause3_timing)
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_right, 2.5), pause3_timing)
             Clock.schedule_once(self.start_cracking, pause3_timing)
             
     def start_cracking(self, dt):
         if self.images_on == True:
             self.right_image.opacity = 0
             self.layout.add_widget(self.right_image, index = 2)
-            Clock.schedule_interval(lambda dt: self.image_appear(dt, self.right_image, 1), 0.1)
+            Clock.schedule_interval(lambda dt: self.image_appear(dt, self.right_image, 1), 0.2)
         if self.effects_on == True:
             self.crack.play()
         
