@@ -292,7 +292,7 @@ class AdventureApp(App):
         self.option_fork = Clock.schedule_once(self.add_fork_options, schedule_time)
        
     def skip_fork(self, instance):
-         if self.char_index < len(self.disc_text):
+         if self.char_index < len(self.fork_text):
             self.fork_label.text = self.fork_text
             self.type_write_fork.cancel()
             self.option_fork.cancel()
