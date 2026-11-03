@@ -84,6 +84,15 @@ class AdventureApp(App):
         self.skipped_pit = False
         self.skipped_right = False
         #)
+        
+        self.continue_button = Button(
+            text="Continue",
+            size_hint=(0.5, 0.2),
+            pos_hint={'center_x': 0.5, 'center_y': 0.2},
+            font_size="27sp",
+            color=self.brown
+        )
+        
         Clock.schedule_once(self.loadlogo, 3)
         return self.layout
         
@@ -238,7 +247,7 @@ class AdventureApp(App):
             text="",
             font_size="21sp",
             size_hint=(1, 0.6),
-            pos_hint={'x': 0, 'top': 0.95},
+            pos_hint={'x': 0, 'top': 1},
             color=get_color_from_hex("B3865B"),
             text_size=(Window.width * 0.9, Window.height * 0.6),
             halign='left',
@@ -345,7 +354,7 @@ class AdventureApp(App):
             text="",
             font_size="27sp",
             size_hint=(1, 0.6),
-            pos_hint={'x': 0, 'top': 0.95},
+            pos_hint={'x': 0, 'top': 1},
             color=get_color_from_hex("B3865B"),
             text_size=(Window.width * 0.9, Window.height * 0.6),
             halign='left',
@@ -422,15 +431,17 @@ class AdventureApp(App):
                    
     def grapple_path(self, instance):
         self.layout.clear_widgets()
-        if self.right_grnd_brkn == True:
+        if self.right_grnd_brkn and not self.havegrapple:
             self.right_text = "You walk back through the right. You reach the ground that was once there. You can't see the bottom of the ground where it once was. You can't think of a way across"
+        elif self.right_grnd_brkn and self.havegrapple:
+            self.right_text = "You walk back through the right. You reach the ground that was once there. You can't see the bottom of the ground where it once was. You can't think of a reason to go back across"    
         else:
             self.right_text = "You go through the right opening. A few steps in, the light from the fork behind you is almost dim. You can see a faint light from the end of this opening, you decide to follow it. Suddenly, the ground below you starts to shake and crack. You have to act fast. What do you do?"
         self.right_label = Label(
             text="",
             font_size="22sp",
             size_hint=(1, 0.6),
-            pos_hint={'x': 0, 'top': 0.95},
+            pos_hint={'x': 0, 'top': 1},
             color=self.brown,
             text_size=(Window.width * 0.9, Window.height * 0.6),
             halign='left',
@@ -457,17 +468,56 @@ class AdventureApp(App):
         pause2_timing = len("You go through the right opening. A few steps in, the light from the fork behind you is almost dim.") * 0.05 + 0.1
         if not self.right_grnd_brkn:
             Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_right, 0.5), pause2_timing)
-        pause3_timing = len("You go through the right opening. A few steps in, the light from the fork behind you is almost dim. You can see a faint light from the end of this opening, you decide to follow it. Suddenly,") * 0.05 + 0.25
+        pause3_timing = len("You go through the right opening. A few steps in, the light from the fork behind you is almost dim. You can see a faint light from the end of this opening, you decide to follow it. Suddenly,") * 0.05 + 0.3
         if not self.right_grnd_brkn:
             Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_right, 2.5), pause3_timing)
             Clock.schedule_once(self.start_cracking, pause3_timing)
-            
+        schedule_time = len(self.right_text) * 0.05 + 3.45
+        Clock.schedule_once(self.right_options, schedule_time)
+        
+    def right_options(self, dt):
+        self.return_attempt = Button(
+            text="Try to go back, off of the cracking floor",
+            font_size="22sp",
+            size_hint=(1, 0.13),
+            pos_hint={'center_x': 0.5, 'y': 0},
+            background_color=self.brown
+        )
+        self.return_attempt.bind(on_press=self.rerturned)
+        self.layout.add_widget(self.return_attempt)
+        
+    def returned(self, instance):
+        self.right_grnd_brkn = True
+        self.returned_text = "You trace back your steps off of the cracking floor. The ground crumbles, you can no longer go that way."
+        self.returned_label = Label(
+            text="",
+            font_size="27sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=self.brown,
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.returned_label)
+        self.type_write_returned = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.returned_text, self.returned_label), 0.05)
+        pause_timing = len("You trace back your steps off of the cracking floor.") * 0.05
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_returned, 0.6), pause_timing)
+        Clock.schedule_once(self.crumble, pause_timing)
+        schedule_time = len(self.returned_text) * 0.05 + 0.6
+        Clock.schedule_once(lambda dt: self.add_continue(dt, self.start_game), schedule_time)
+    def crumble(self, dt):
+            self.crack.stop()
+            self.impact.play()
+                        
     def start_cracking(self, dt):
         if self.images_on == True:
             self.right_image.opacity = 0
             self.layout.add_widget(self.right_image, index = 2)
             Clock.schedule_interval(lambda dt: self.image_appear(dt, self.right_image, 1), 0.2)
         if self.effects_on == True:
+            self.ambience.volume = 0.2
             self.crack.play()
         
     def long_path(self, instance):
@@ -584,6 +634,7 @@ class AdventureApp(App):
             if self.skip_button.disabled == False:
                 self.skip_button.disabled = True
                 self.skip_button.opacity = 0
+            self.char_index = 0
             return False # Returning False automatically stops the interval loop
 
     def image_appear(self, dt, target_image, target_opacity):
@@ -591,6 +642,10 @@ class AdventureApp(App):
             target_image.opacity += 0.1
         else:
             return False
+            
+    def add_continue(self, dt, function):
+        self.continue_button.bind(on_press=function)
+        self.layout.add_widget(self.continue_button)
                 
     def turn_on_image(self, instance):
         self.images_on = True
