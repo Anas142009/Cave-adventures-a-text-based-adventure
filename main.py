@@ -76,13 +76,7 @@ class AdventureApp(App):
         self.images_on = True 
         self.ambience_on = True
         self.effects_on = True
-        self.havegrapple = False
         self.brown = get_color_from_hex("B3865B")
-        self.started = False
-        self.right_grnd_brkn = False
-        self.skipped_disc = False
-        self.skipped_pit = False
-        self.skipped_right = False
         #)
         
         self.continue_button = Button(
@@ -162,6 +156,13 @@ class AdventureApp(App):
     def main_menu(self, instance):
         self.layout.clear_widgets()
         
+        self.havegrapple = False
+        self.started = False
+        self.right_grnd_brkn = False
+        self.skipped_disc = False
+        self.skipped_pit = False
+        self.skipped_right = False
+        
         self.gamename = Label(
             text="CAVE\nADVENTURES",
             font_size="40sp",
@@ -170,7 +171,7 @@ class AdventureApp(App):
             halign='center',
             bold=True,
             italic=True,
-            color=get_color_from_hex("B3865B")
+            color=self.brown
         )
         
         self.start_button = Button(
@@ -247,7 +248,7 @@ class AdventureApp(App):
             text="",
             font_size="21sp",
             size_hint=(1, 0.6),
-            pos_hint={'x': 0, 'top': 1},
+            pos_hint={'x': 0, 'top': 0.95},
             color=get_color_from_hex("B3865B"),
             text_size=(Window.width * 0.9, Window.height * 0.6),
             halign='left',
@@ -354,7 +355,7 @@ class AdventureApp(App):
             text="",
             font_size="27sp",
             size_hint=(1, 0.6),
-            pos_hint={'x': 0, 'top': 1},
+            pos_hint={'x': 0, 'top': 0.95},
             color=get_color_from_hex("B3865B"),
             text_size=(Window.width * 0.9, Window.height * 0.6),
             halign='left',
@@ -441,7 +442,7 @@ class AdventureApp(App):
             text="",
             font_size="22sp",
             size_hint=(1, 0.6),
-            pos_hint={'x': 0, 'top': 1},
+            pos_hint={'x': 0, 'top': 0.95},
             color=self.brown,
             text_size=(Window.width * 0.9, Window.height * 0.6),
             halign='left',
@@ -472,7 +473,10 @@ class AdventureApp(App):
         if not self.right_grnd_brkn:
             Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_right, 2.5), pause3_timing)
             Clock.schedule_once(self.start_cracking, pause3_timing)
-        schedule_time = len(self.right_text) * 0.05 + 3.45
+        if not self.right_grnd_brkn:
+            schedule_time = len(self.right_text) * 0.05 + 3.4
+        else:
+            schedule_time = len(self.right_text) * 0.05
         Clock.schedule_once(self.right_options, schedule_time)
         
     def right_options(self, dt):
@@ -483,10 +487,53 @@ class AdventureApp(App):
             pos_hint={'center_x': 0.5, 'y': 0},
             background_color=self.brown
         )
-        self.return_attempt.bind(on_press=self.rerturned)
+        self.return_attempt.bind(on_press=self.returned)
+        if self.right_grnd_brkn:
+            self.return_attempt.text = "Go back"
+            self.return_attempt.pos_hint = {'center_x': 0.5, 'center_y': 0.2}
+            self.return_attempt.size_hint = (0.5, 0.2)
+            self.return_attempt.unbind(on_press=self.returned)
+            self.return_attempt.bind(on_press=self.start_game)
+            
+        self.dash_across = Button(
+            text="Try to dash across the cracking floor",
+            font_size="22sp",
+            size_hint=(1, 0.13),
+            pos_hint={'center_x': 0.5, 'center_y': 0.2},
+            background_color=self.brown
+        )
+        self.dash_across.bind(on_press=dashed)
+        
+        self.jump_over = Button(
+            text="Try to jump over the cracking floor",
+            font_size="22sp",
+            size_hint=(1, 0.13),
+            pos_hint={'center_x': 0.5, 'top': 0.4},
+            background_color=self.brown
+        )
+        self.jump_over.bind(on_press=jumped)
+        
+        if not self.right_grnd_brkn:
+            self.layout.add_widget(dash_across)
+            self.layout.add_widget(jump_across)
         self.layout.add_widget(self.return_attempt)
         
+    def jumped(self, instance):
+        self.layout.clear_widgets()
+        self.jumped_text = "You try to jump over the cracking ground. You look below you, the ground crumbles under your feet. You extend your arm forward trying to grab the ledge. Your fingers slip."
+        self.jumped_label = Label(
+            text="",
+            font_size="25sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=self.brown,
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
     def returned(self, instance):
+        self.layout.clear_widgets()
         self.right_grnd_brkn = True
         self.returned_text = "You trace back your steps off of the cracking floor. The ground crumbles, you can no longer go that way."
         self.returned_label = Label(
@@ -500,15 +547,18 @@ class AdventureApp(App):
             valign='top',
             bold=True
         )
+        self.layout.add_widget(self.text_background)
         self.layout.add_widget(self.returned_label)
+        
+        
         self.type_write_returned = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.returned_text, self.returned_label), 0.05)
-        pause_timing = len("You trace back your steps off of the cracking floor.") * 0.05
-        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_returned, 0.6), pause_timing)
+        pause_timing = len("You trace back your steps off of the cracking floor.") * 0.05 - 0.15
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_returned, 1.2), pause_timing)
         Clock.schedule_once(self.crumble, pause_timing)
-        schedule_time = len(self.returned_text) * 0.05 + 0.6
+        schedule_time = len(self.returned_text) * 0.05 + 1.2
         Clock.schedule_once(lambda dt: self.add_continue(dt, self.start_game), schedule_time)
     def crumble(self, dt):
-        if self.effect_on == True:
+        if self.effects_on == True:
             self.crack.stop()
             self.impact.play()
                         
