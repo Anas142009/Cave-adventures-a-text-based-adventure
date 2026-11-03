@@ -508,6 +508,7 @@ class AdventureApp(App):
         schedule_time = len(self.returned_text) * 0.05 + 0.6
         Clock.schedule_once(lambda dt: self.add_continue(dt, self.start_game), schedule_time)
     def crumble(self, dt):
+        if self.effect_on == True:
             self.crack.stop()
             self.impact.play()
                         
