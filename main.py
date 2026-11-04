@@ -135,7 +135,7 @@ class AdventureApp(App):
         self.layout.add_widget(self.disclaimer_label)
         self.char_index = 0
         self.type_write = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.disc_text, self.disclaimer_label), 0.05)
-        schedule_time = len(self.disc_text) * 0.05 + 0.5
+        schedule_time = len(self.disc_text) * 0.05
         self.understood = Clock.schedule_once(self.add_understand, schedule_time)
          
 
@@ -288,7 +288,7 @@ class AdventureApp(App):
         
         self.char_index = 0
         self.type_write_fork = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.fork_text, self.fork_label), 0.045)
-        schedule_time = len(self.fork_text) * 0.05
+        schedule_time = len(self.fork_text) * 0.045 - 0.18
         self.option_fork = Clock.schedule_once(self.add_fork_options, schedule_time)
        
     def skip_fork(self, instance):
@@ -537,9 +537,14 @@ class AdventureApp(App):
         pause_timing = len("You try to jump over the cracking ground.") * 0.05 - 0.2
         self.type_write_jumped = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.jumped_text, self.jumped_label), 0.05)
         Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_jumped, 1.2), pause_timing)
-        Clock.schedule_once(self.crumble, pause_timing`)
-        pause_timing2 = len("You try to jump over the cracking ground. You look below you, the ground crumbles under your feet.") * 0.05 + 1.3
+        Clock.schedule_once(self.crumble, pause_timing)
+        pause_timing2 = len("You try to jump over the cracking ground. You look below you, the ground crumbles under your feet.") * 0.05 + 0.85
         Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_jumped, 0.5), pause_timing2)
+        pause_timing3 = (len(self.jumped_text) - len("your fingers slip")) * 0.05 + 1
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_jumped, 3.5), pause_timing3)
+        death_timing = pause_timing3 + len("your fingers slip.") * 0.05 + 5
+        self.cod = "fell to doom"
+        Clock.schedule_once(lambda dt: self.game_over(dt, self.grapple_path), death_timing)
         
     def dashed(self, instance):
         self.layout.clear_widgets()
@@ -705,6 +710,66 @@ class AdventureApp(App):
             self.char_index = 0
             return False # Returning False automatically stops the interval loop
 
+    def game_over(self, dt, previous_screen):
+        self.layout.clear_widgets()
+        self.died_label = Label(
+            text="You Died",
+            font_size = "50sp",
+            color=[1, 0, 0, 1],
+            size_hint = (1, 0.25),
+            text_size = (Window.width * 0.9, Window.height * 0.25),
+            pos_hint = {'center_x': 0.5, 'top': 0.95},
+            halign='center',
+            valign='center'            
+        )
+        
+        self.cod_label = Label(
+            text=self.cod,
+            font_size="24sp",
+            color=self.brown,
+            size_hint=(1, 0.1),
+            pos_hint={'center_x': 0.5, 'top': 0.75},
+            text_size=(Window.width * 0.95, Window.height * 0.1),
+            halign='center',
+            valign='top'
+        )
+        
+        self.main_menu_button = Button(
+            text="Back to main menu",
+            font_size="22sp",
+            size_hint=(0.6, 0.1),
+            pos_hint={'center_x': 0.5, 'y': 0},
+            background_color=self.brown
+        )
+        self.main_menu_button.bind(on_press=self.main_menu)
+        
+        self.retry_btn = Button(
+            text="Retry from last screen",
+            font_size="22sp",
+            size_hint=(0.6, 0.1),
+            pos_hint={'center_x': 0.5, 'y': 0.1},
+            background_color=self.brown
+        )
+        self.retry_btn.bind(on_press=previous_screen)
+        if self.ambience_on == True:
+            self.retry_btn.bind(on_press=lambda instance: self.ambience.play())
+        if self.effects_on == True:
+            self.death_sound.play()
+        if self.ambience_on == True:
+            self.ambience.stop() 
+        self.died_label.opacity = 0
+        self.cod_label.opacity = 0
+        self.layout.add_widget(self.died_label)
+        self.layout.add_widget(self.cod_label)
+        
+        Clock.schedule_interval(lambda dt: self.image_appear(dt, self.died_label, 1), 0.1)
+        Clock.schedule_interval(lambda dt: self.image_appear(dt, self.cod_label, 1), 0.2)
+        Clock.schedule_once(self.add_death_options, 2.5)
+   
+    def add_death_options(self, dt):
+        self.layout.add_widget(self.main_menu_button)
+        self.layout.add_widget(self.retry_btn)
+        
     def image_appear(self, dt, target_image, target_opacity):
         if target_image.opacity < target_opacity:
             target_image.opacity += 0.1
