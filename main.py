@@ -77,6 +77,7 @@ class AdventureApp(App):
         self.ambience_on = True
         self.effects_on = True
         self.brown = get_color_from_hex("B3865B")
+        self.skipped_disc = False
         #)
         
         self.continue_button = Button(
@@ -159,7 +160,6 @@ class AdventureApp(App):
         self.havegrapple = False
         self.started = False
         self.right_grnd_brkn = False
-        self.skipped_disc = False
         self.skipped_pit = False
         self.skipped_right = False
         
@@ -297,11 +297,11 @@ class AdventureApp(App):
             self.type_write_fork.cancel()
             self.option_fork.cancel()
             self.skip_button.disabled = True
-            self.skip_button.opacity = 0
+            self.layout.remove_widget(self.skip_button)
             self.option_fork = Clock.schedule_once(self.add_fork_options, 0)
          else:
             self.skip_button.disabled = True
-            self.skip_button.opacity = 0
+            self.layout.remove_widget(self.skip_button)
             
     def add_fork_options(self, dt):
         self.r_opening = Button(
@@ -401,11 +401,11 @@ class AdventureApp(App):
             self.pause_type_write.cancel()
             self.pause_type_write2.cancel()
             self.skip_button.disabled = True
-            self.skip_button.opacity = 0
+            self.layout.remove_widget(self.skip_button)
             self.option_fork = Clock.schedule_once(self.pit_options, 0)
          else:
             self.skip_button.disabled = True
-            self.skip_button.opacity = 0
+            self.layout.remove_widget(self.skip_button)
     
     def pit_options(self, dt):
         self.return_button = Button(
@@ -502,7 +502,7 @@ class AdventureApp(App):
             pos_hint={'center_x': 0.5, 'center_y': 0.2},
             background_color=self.brown
         )
-        self.dash_across.bind(on_press=dashed)
+        self.dash_across.bind(on_press=self.dashed)
         
         self.jump_over = Button(
             text="Try to jump over the cracking floor",
@@ -511,11 +511,11 @@ class AdventureApp(App):
             pos_hint={'center_x': 0.5, 'top': 0.4},
             background_color=self.brown
         )
-        self.jump_over.bind(on_press=jumped)
+        self.jump_over.bind(on_press=self.jumped)
         
         if not self.right_grnd_brkn:
-            self.layout.add_widget(dash_across)
-            self.layout.add_widget(jump_across)
+            self.layout.add_widget(self.dash_across)
+            self.layout.add_widget(self.jump_over)
         self.layout.add_widget(self.return_attempt)
         
     def jumped(self, instance):
@@ -532,6 +532,19 @@ class AdventureApp(App):
             valign='top',
             bold=True
         )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.jumped_label)
+        pause_timing = len("You try to jump over the cracking ground.") * 0.05 - 0.2
+        self.type_write_jumped = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.jumped_text, self.jumped_label), 0.05)
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_jumped, 1.2), pause_timing)
+        Clock.schedule_once(self.crumble, pause_timing`)
+        pause_timing2 = len("You try to jump over the cracking ground. You look below you, the ground crumbles under your feet.") * 0.05 + 1.3
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_jumped, 0.5), pause_timing2)
+        
+    def dashed(self, instance):
+        self.layout.clear_widgets()
+        self.right_grnd_brkn = True
+        self.stop()  
     def returned(self, instance):
         self.layout.clear_widgets()
         self.right_grnd_brkn = True
@@ -561,6 +574,10 @@ class AdventureApp(App):
         if self.effects_on == True:
             self.crack.stop()
             self.impact.play()
+            Clock.schedule_once(self.fix_ambience, 0.5)
+            
+    def fix_ambience(self, dt):
+        self.ambience.volume = 0.8
                         
     def start_cracking(self, dt):
         if self.images_on == True:
