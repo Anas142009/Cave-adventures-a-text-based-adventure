@@ -1,1 +1,0 @@
- if hasattr(self, 'something') and self.something: #checks if something is available within a function and is active, and proceeds to do something with it.
