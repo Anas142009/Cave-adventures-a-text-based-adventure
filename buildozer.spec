@@ -4,6 +4,7 @@ title = Cave Adventures
 package.name = caveadventure
 package.domain = org.example
 source.dir = .
+source.exclude_dirs = formulas
 source.include_exts = py,png,jpg,kv,atlas,wav,mp3,jpeg,TTF
 version = 0.1.0
 requirements = python3,kivy,arabic-reshaper,python-bidi
