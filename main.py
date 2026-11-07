@@ -594,15 +594,15 @@ class AdventureApp(App):
         pause_time = len(self.threshold) * 0.05 - 0.1
         self.pause_fend = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.5, self.threshold), pause_time) 
         pause_time2 = len(self.threshold2) * 0.05 + 0.4
-         self.pause_fend2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.7, self.threshold2), pause_time2)
-         pause_time3 = len(self.threshold3) * 0.05 + 1.1
-         self.pause_fend3 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.5, self.threshold3), pause_time3)
-         pause_time4 = len(self.threshold4) * 0.05 + 1.6
-          self.pause_fend4 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.5, self.threshold4), pause_time4)
-          pause_time5 = len(self.threshold5) * 0.05 + 2.1
-           self.pause_fend5 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.5, self.threshold5), pause_time5)
-           schedule_time = len(self.fended_text) * 0.05 + 3.5
-           Clock.schedule_once(lambda dt: self.game_over(dt, self.grappled), schedule_time)          
+        self.pause_fend2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.7, self.threshold2), pause_time2)
+        pause_time3 = len(self.threshold3) * 0.05 + 1.1
+        self.pause_fend3 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.5, self.threshold3), pause_time3)
+        pause_time4 = len(self.threshold4) * 0.05 + 1.6
+        self.pause_fend4 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.5, self.threshold4), pause_time4)
+        pause_time5 = len(self.threshold5) * 0.05 + 2.1
+        self.pause_fend5 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.5, self.threshold5), pause_time5)
+        schedule_time = len(self.fended_text) * 0.05 + 3.5
+        Clock.schedule_once(lambda dt: self.game_over(dt, self.grappled), schedule_time)          
     
     def amp_bats(self, dt):
         Clock.schedule_interval(lambda dt: self.amplification(dt, self.bat_sound, 0.8), 1)
