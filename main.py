@@ -89,6 +89,16 @@ class AdventureApp(App):
         if self.boulder_sound:
             self.boulder_sound.volume = 1
             self.boulder_sound.loop = True
+        
+        self.bat_death = SoundLoader.load("assets/bat_eat.mp3")
+        if self.bat_death:
+            self.bat_death.volume = 1
+            self.bat_death.loop = False
+            
+        self.crush = SoundLoader.load("assets/bone_break.mp3")
+        if self.crush:
+            self.crush.volume = 1
+            self.crush.loop = False
             
         self.layout = FloatLayout()
         
@@ -97,6 +107,9 @@ class AdventureApp(App):
         self.ambience_on = True
         self.effects_on = True
         self.brown = get_color_from_hex("B3865B")
+        self.bat_eaten = "eaten by bats"
+        self.fall_death = "fell to doom"
+        self.crush_death = "crushed to death"
         #)
         
         self.continue_button = Button(
@@ -362,6 +375,9 @@ class AdventureApp(App):
 
     def big_hole(self, instance):
         self.layout.clear_widgets()
+        #REMOVE    THIS    AFTER    TESTING
+        self.havegrapple = True
+        
         if self.havegrapple == True:
             self.hole_text = "You walk straight forward.\nA giant pit stops you in your path.\nYour grapple gun might get you over it, do you want to use it?"
         else:
@@ -439,6 +455,7 @@ class AdventureApp(App):
             font_size="24sp",
             background_color=self.brown
         )
+        self.grapple_across.bind(on_press=self.grappled)
         
         if self.havegrapple == True:
             self.layout.add_widget(self.return_button)
@@ -446,6 +463,164 @@ class AdventureApp(App):
         else:
             self.layout.add_widget(self.return_button)
                    
+    def grappled(self, instance):
+        self.layout.clear_widgets()
+        self.grappled_text = "You fire the grapple gun. It attaches to the wall on the other side. You pull in and land safely. It's dark. You hear weird noises from afar. The noises are growing stronger and closer, BATS! A giant horde of bats is rushing toward you. You have to act fast, what do you do?"
+        self.threshold = ""
+        self.threshold2 = "You fire the grapple gun. It attaches to the wall on the other side."
+        self.threshold3 =  "You fire the grapple gun. It attaches to the wall on the other side. You pull in and land safely."
+        self.threshold4 = "You fire the grapple gun. It attaches to the wall on the other side. You pull in and land safely. It's dark. You hear weird noises from afar."
+        self.threshold5 = "You fire the grapple gun. It attaches to the wall on the other side. You pull in and land safely. It's dark. You hear weird noises from afar. The noises are growing stronger and closer, BATS!"
+        self.grappled_label = Label(
+            text="",
+            font_size="22sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.bat_attack = Image(
+            source="assets/bat_attack.png",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+        )
+        if self.images_on:
+            self.bat_attack.opacity = 0
+            self.layout.add_widget(self.bat_attack)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.grappled_label)
+        
+        self.type_write_bat = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.grappled_text, self.grappled_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.15
+        if self.effects_on:
+            self.pause_bat = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_bat, 3.5, self.threshold), pause_time)
+            self.usegrap = Clock.schedule_once(lambda dt: self.grapple.play(), pause_time)
+        if self.effects_on:
+            pause_time2 = len(self.threshold2) * 0.05 + 3.2
+        else:
+            pause_time2 = len(self.threshold2) * 0.05 - 0.15
+        self.pause_bat2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_bat, 2.5, self.threshold2), pause_time2)
+        if self.effects_on:
+            self.grapB = Clock.schedule_once(lambda dt: self.grapple_back.play(), pause_time2)
+        pause_time3 = len(self.threshold3) * 0.05 + 5.5
+        if self.effects_on:
+            self.pause_bat3 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_bat, 0.7, self.threshold3), pause_time3)
+            self.bat_noises = Clock.schedule_once(self.play_bats, pause_time3)
+        if self.effects_on:
+            pause_time4 = len(self.threshold4) * 0.05 + 6
+        else:
+            pause_time4 = len(self.threshold4) * 0.05 + 2.7
+        if self.effects_on:
+            self.bat_amp = Clock.schedule_once(self.amp_bats, pause_time4)
+        self.pause_bat4 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_bat, 0.7, self.threshold4), pause_time4)
+        if self.images_on:
+            Clock.schedule_once(lambda dt: self.make_appearance(dt, self.bat_attack, 0.5, 0.1), pause_time4)
+        if self.effects_on:
+            pause_time5 = len(self.threshold5) * 0.05 + 6.7
+        else:
+            pause_time5 = len(self.threshold5) * 0.05 + 3.4
+        if self.images_on:
+            Clock.schedule_once(lambda dt: self.make_appearance(dt, self.bat_attack, 1, 0.1), pause_time5)
+        self.pause_bat5 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_bat, 1, self.threshold5), pause_time5)
+        if self.effects_on:
+            schedule_time = len(self.grappled_text) * 0.05 + 7.9
+        else:
+             schedule_time = len(self.grappled_text) * 0.05 + 1.9
+        self.bat_situation = Clock.schedule_once(self.add_bat_options, schedule_time)
+        self.cod = "eaten by bats"
+        Clock.schedule_once(lambda dt: self.start_timer(dt, self.grappled, self.bat_sound), schedule_time)
+        if self.effects_on:
+            self.qtfu = Clock.schedule_once(self.bat_stop, schedule_time + 5.5)
+                    
+    def bat_stop(self, dt):
+          try:
+              self.bat_sound.stop()
+          except:
+              pass
+          self.bat_sound2.stop()
+          self.bat_sound3.stop()
+              
+    def add_bat_options(self, dt):
+        self.fend_off = Button(
+            text="Try to fend them off using the grapple gun.",
+            font_size="22sp",
+            size_hint=(1, 0.2),
+            pos_hint={'center_x': 0.5, 'center_y': 0.1},
+            background_color=self.brown
+        )
+        self.fend_off.bind(on_press=self.fended)
+        self.evade = Button(
+            text="Try to avoid them.",
+            font_size="26sp",
+            size_hint=(1, 0.2),
+            pos_hint={'center_x': 0.5, 'center_y': 0.3},
+            background_color=self.brown
+        )
+        self.evade.bind(on_press=self.evaded)
+        
+        self.layout.add_widget(self.fend_off)
+        self.layout.add_widget(self.evade)
+        
+    def fended(self, instance):
+        self.layout.clear_widgets()
+        self.qte.cancel()
+        self.qtfu.cancel()
+        self.fended_text = "You try to use your grapple gun to fend them off. You fend off the first, second, and third bat successfully. The fourth bat latches onto your ear and rips it off. As you try to recover, a few more bats latch onto your shoulders, arms, and face. They bite and scratch multiple times, you are simply overwhelmed by their huge number. It hurt so much, your whole body feels numb now. You pass out."
+        self.threshold = "You try to use your grapple gun to fend them off. You fend off the first, second, and third bat successfully."
+        self.threshold2 = "You try to use your grapple gun to fend them off. You fend off the first, second, and third bat successfully. The fourth bat latches onto your ear and rips it off."
+        self.threshold3 = "You try to use your grapple gun to fend them off. You fend off the first, second, and third bat successfully. The fourth bat latches onto your ear and rips it off. As you try to recover, a few more bats latch onto your shoulders, arms, and face."
+        self.threshold4 = "You try to use your grapple gun to fend them off. You fend off the first, second, and third bat successfully. The fourth bat latches onto your ear and rips it off. As you try to recover, a few more bats latch onto your shoulders, arms, and face. They bite and scratch multiple times, you are simply overwhelmed by their huge number."
+        self.threshold5 = "You try to use your grapple gun to fend them off. You fend off the first, second, and third bat successfully. The fourth bat latches onto your ear and rips it off. As you try to recover, a few more bats latch onto your shoulders, arms, and face. They bite and scratch multiple times, you are simply overwhelmed by their huge number. It hurt so much, your whole body feels numb now."
+        self.fended_label = Label(
+            text="",
+            font_size="20sp",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.fended_label)
+        
+        self.type_write_fend = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.fended_text, self.fended_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.1
+        self.pause_fend = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.5, self.threshold), pause_time) 
+        pause_time2 = len(self.threshold2) * 0.05 + 0.4
+         self.pause_fend2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.7, self.threshold2), pause_time2)
+         pause_time3 = len(self.threshold3) * 0.05 + 1.1
+         self.pause_fend3 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.5, self.threshold3), pause_time3)
+         pause_time4 = len(self.threshold4) * 0.05 + 1.6
+          self.pause_fend4 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.5, self.threshold4), pause_time4)
+          pause_time5 = len(self.threshold5) * 0.05 + 2.1
+           self.pause_fend5 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.5, self.threshold5), pause_time5)
+           schedule_time = len(self.fended_text) * 0.05 + 3.5
+           Clock.schedule_once(lambda dt: self.game_over(dt, self.grappled), schedule_time)          
+    
+    def amp_bats(self, dt):
+        Clock.schedule_interval(lambda dt: self.amplification(dt, self.bat_sound, 0.8), 1)
+        Clock.schedule_interval(lambda dt: self.amplification(dt, self.bat_sound2, 0.8), 1)
+        Clock.schedule_interval(lambda dt: self.amplification(dt, self.bat_sound3, 0.8), 1)
+        
+                
+    def evaded(self, instance):
+        self.stop()
+        
+    def play_bats(self, dt):
+        self.bat_sound.volume = 0.1
+        self.bat_sound2.volume = 0.1
+        self.bat_sound3.volume = 0.1
+        self.bat_sound.play()
+        self.bat_sound2.play()
+        self.bat_sound3.play()
+        
     def grapple_path(self, instance):
         self.layout.clear_widgets()
         if self.right_grnd_brkn and not self.havegrapple:
@@ -900,7 +1075,7 @@ class AdventureApp(App):
     def start_timer(self, dt, previous_screen, SFX):
         self.timer_label = Label(
             text="",
-            font_size="80sp",
+            font_size="90sp",
             size_hint=(1, 0.6),
             pos_hint={'center_x': 0.5, 'center_y': 0.7},
             text_size=(Window.width * 0.9, Window.height * 0.6),
@@ -992,7 +1167,12 @@ class AdventureApp(App):
         if self.ambience_on == True:
             self.retry_btn.bind(on_press=lambda instance: self.ambience.play())
         if self.effects_on == True:
-            self.death_sound.play()
+            if self.cod == self.fall_death:
+                self.death_sound.play()
+            elif self.cod == self.bat_eaten:
+                self.bat_death.play()
+            elif self.cod == self.crush_death:
+                self.crush_play()
         if self.ambience_on == True:
             self.ambience.stop() 
         self.died_label.opacity = 0
@@ -1008,12 +1188,21 @@ class AdventureApp(App):
         self.layout.add_widget(self.main_menu_button)
         self.layout.add_widget(self.retry_btn)
         
+    def make_appearance(self, dt, target_image, target_opacity, interval):
+        Clock.schedule_interval(lambda dt: self.image_appear(dt, target_image, target_opacity), interval)
+        
     def image_appear(self, dt, target_image, target_opacity):
         if target_image.opacity < target_opacity:
             target_image.opacity += 0.1
         else:
             return False
             
+    def amplification(self, dt, SFX, target_volume):
+        if SFX.volume < target_volume:
+            SFX.volume += 0.1
+        else:
+            return False
+
     def add_continue(self, dt, function):
         # 1. If a previous function was bound, unbind it first
         if hasattr(self, 'current_continue_func') and self.current_continue_func:
