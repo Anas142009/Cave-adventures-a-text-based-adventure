@@ -193,6 +193,7 @@ class AdventureApp(App):
         self.havegrapple = False
         self.started = False
         self.right_grnd_brkn = False
+        self.batted = False
         self.quick_timer = 5
                
         self.gamename = Label(
@@ -375,9 +376,9 @@ class AdventureApp(App):
 
     def big_hole(self, instance):
         self.layout.clear_widgets()
-        #REMOVE    THIS    AFTER    TESTING
+        #REMOVE    THIS    AFTER    TESTING:(
         self.havegrapple = True
-        
+        #)
         if self.havegrapple == True:
             self.hole_text = "You walk straight forward.\nA giant pit stops you in your path.\nYour grapple gun might get you over it, do you want to use it?"
         else:
@@ -434,10 +435,12 @@ class AdventureApp(App):
             self.pause_type_write2.cancel()
             self.layout.remove_widget(self.skip_button)
             self.skip_button.unbind(on_press=self.skip_pit)
+            self.char_index = 0
             self.option_fork = Clock.schedule_once(self.pit_options, 0)
          else:
             self.layout.remove_widget(self.skip_button)
             self.skip_button.unbind(on_press=self.skip_pit)
+            self.char_index = 0
     
     def pit_options(self, dt):
         self.return_button = Button(
@@ -455,7 +458,10 @@ class AdventureApp(App):
             font_size="24sp",
             background_color=self.brown
         )
-        self.grapple_across.bind(on_press=self.grappled)
+        if not self.batted:
+            self.grapple_across.bind(on_press=self.grappled)
+        else:
+            self.grapple_across.bind(on_press=self.grappled2)
         
         if self.havegrapple == True:
             self.layout.add_widget(self.return_button)
@@ -463,6 +469,60 @@ class AdventureApp(App):
         else:
             self.layout.add_widget(self.return_button)
                    
+    def grappled2(self, instance):
+        self.layout.clear_widgets()
+        self.grappled2_text = "You grapple back to the area where the bats attacked you. You take one last moment to consider your options."
+        self.threshold2="You grapple back to the area where the bats attacked you."
+        self.grappled2_label = Label(
+            text="",
+            font_size="28sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0,  'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True,
+            color=self.brown
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.grappled2_label)
+        self.layout.add_widget(self.skip_button)
+        self.current_skip_func = self.skip_grappled2
+        self.skip_button.bind(on_press=self.skip_grappled2)
+        
+        self.type_write_grappled2 = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.grappled2_text, self.grappled2_label), 0.05)
+        pause_time2 = len(self.threshold2) * 0.05 - 0.2
+        if self.effects_on:
+            self.play_grap = Clock.schedule_once(lambda dt: self.grapple.play(), pause_time2 + 0.2)
+            self.play_grapB = Clock.schedule_once(lambda dt: self.grapple_back.play(), pause_time2 + 3.7)
+            self.pause_grappled2_2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_grappled2, 6, self.threshold2), pause_time2)
+        else:
+            self.pause_grappled2_2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_grappled2, 0.5, self.threshold2), pause_time2)
+                
+        if self.effects_on:
+            schedule_time = len(self.grappled2_text) * 0.05 + 6
+        else:
+            schedule_time = len(self.grappled2_text) * 0.05 + 0.5
+        self.batted_options = Clock.schedule_once(self.evade_options, schedule_time)
+        
+    def skip_grappled2(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_write_grappled2.cancel()
+            self.pause_grappled2_2.cancel()            
+            if self.effects_on:
+                self.play_grap.cancel()
+                self.play_grapB.cancel()
+            self.batted_options.cancel()
+            self.char_index = 0
+            Clock.schedule_once(self.evade_options, 0)
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        
     def grappled(self, instance):
         self.layout.clear_widgets()
         self.grappled_text = "You fire the grapple gun. It attaches to the wall on the other side. You pull in and land safely. It's dark. You hear weird noises from afar. The noises are growing stronger and closer, BATS! A giant horde of bats is rushing toward you. You have to act fast, what do you do?"
@@ -514,7 +574,7 @@ class AdventureApp(App):
         if self.effects_on:
             pause_time4 = len(self.threshold4) * 0.05 + 6
         else:
-            pause_time4 = len(self.threshold4) * 0.05 + 2.7
+            pause_time4 = len(self.threshold4) * 0.05 + 2.15
         if self.effects_on:
             self.bat_amp = Clock.schedule_once(self.amp_bats, pause_time4)
         self.pause_bat4 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_bat, 0.7, self.threshold4), pause_time4)
@@ -523,14 +583,14 @@ class AdventureApp(App):
         if self.effects_on:
             pause_time5 = len(self.threshold5) * 0.05 + 6.7
         else:
-            pause_time5 = len(self.threshold5) * 0.05 + 3.4
+            pause_time5 = len(self.threshold5) * 0.05 + 2.8
         if self.images_on:
             Clock.schedule_once(lambda dt: self.make_appearance(dt, self.bat_attack, 1, 0.1), pause_time5)
         self.pause_bat5 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_bat, 1, self.threshold5), pause_time5)
         if self.effects_on:
             schedule_time = len(self.grappled_text) * 0.05 + 7.9
         else:
-             schedule_time = len(self.grappled_text) * 0.05 + 1.9
+             schedule_time = len(self.grappled_text) * 0.05 + 4.5
         self.bat_situation = Clock.schedule_once(self.add_bat_options, schedule_time)
         self.cod = "eaten by bats"
         Clock.schedule_once(lambda dt: self.start_timer(dt, self.grappled, self.bat_sound), schedule_time)
@@ -547,7 +607,7 @@ class AdventureApp(App):
               
     def add_bat_options(self, dt):
         self.fend_off = Button(
-            text="Try to fend them off using the grapple gun.",
+            text="Try to fend them off using the grapple gun",
             font_size="22sp",
             size_hint=(1, 0.2),
             pos_hint={'center_x': 0.5, 'center_y': 0.1},
@@ -555,8 +615,8 @@ class AdventureApp(App):
         )
         self.fend_off.bind(on_press=self.fended)
         self.evade = Button(
-            text="Try to avoid them.",
-            font_size="26sp",
+            text="Try to avoid them",
+            font_size="24sp",
             size_hint=(1, 0.2),
             pos_hint={'center_x': 0.5, 'center_y': 0.3},
             background_color=self.brown
@@ -569,7 +629,8 @@ class AdventureApp(App):
     def fended(self, instance):
         self.layout.clear_widgets()
         self.qte.cancel()
-        self.qtfu.cancel()
+        if self.effects_on:
+            self.qtfu.cancel()
         self.fended_text = "You try to use your grapple gun to fend them off. You fend off the first, second, and third bat successfully. The fourth bat latches onto your ear and rips it off. As you try to recover, a few more bats latch onto your shoulders, arms, and face. They bite and scratch multiple times, you are simply overwhelmed by their huge number. It hurt so much, your whole body feels numb now. You pass out."
         self.threshold = "You try to use your grapple gun to fend them off. You fend off the first, second, and third bat successfully."
         self.threshold2 = "You try to use your grapple gun to fend them off. You fend off the first, second, and third bat successfully. The fourth bat latches onto your ear and rips it off."
@@ -591,18 +652,20 @@ class AdventureApp(App):
         self.layout.add_widget(self.fended_label)
         
         self.type_write_fend = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.fended_text, self.fended_label), 0.05)
-        pause_time = len(self.threshold) * 0.05 - 0.1
+        pause_time = len(self.threshold) * 0.05 - 0.5
         self.pause_fend = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.5, self.threshold), pause_time) 
-        pause_time2 = len(self.threshold2) * 0.05 + 0.4
+        pause_time2 = len(self.threshold2) * 0.05 - 0.15
         self.pause_fend2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.7, self.threshold2), pause_time2)
-        pause_time3 = len(self.threshold3) * 0.05 + 1.1
+        pause_time3 = len(self.threshold3) * 0.05 + 0.45
         self.pause_fend3 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.5, self.threshold3), pause_time3)
-        pause_time4 = len(self.threshold4) * 0.05 + 1.6
+        pause_time4 = len(self.threshold4) * 0.05 + 0.8
         self.pause_fend4 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.5, self.threshold4), pause_time4)
-        pause_time5 = len(self.threshold5) * 0.05 + 2.1
+        pause_time5 = len(self.threshold5) * 0.05 + 1.25
         self.pause_fend5 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_fend, 0.5, self.threshold5), pause_time5)
-        schedule_time = len(self.fended_text) * 0.05 + 3.5
-        Clock.schedule_once(lambda dt: self.game_over(dt, self.grappled), schedule_time)          
+        schedule_time = len(self.fended_text) * 0.05 + 3.75
+        Clock.schedule_once(lambda dt: self.game_over(dt, self.grappled), schedule_time)
+        if self.effects_on:
+            Clock.schedule_once(self.bat_stop, schedule_time)          
     
     def amp_bats(self, dt):
         Clock.schedule_interval(lambda dt: self.amplification(dt, self.bat_sound, 0.8), 1)
@@ -611,8 +674,96 @@ class AdventureApp(App):
         
                 
     def evaded(self, instance):
-        self.stop()
+        self.layout.clear_widgets()
+        self.qte.cancel()
+        self.batted = True
+        if self.effects_on:
+            self.qtfu.cancel()
+        self.evaded_text = "You roll to the side and stay low. You watch as one, two, three bats fly by you. Soon after, a fourth bat passes by followed by the rest of them. They fly by you like a very fast gust of wind. You stand back up. There is a faint light from the area where the bats were, but you don't know what might await you there. Do you follow that, or head back towards the fork?"
+        self.threshold = "You roll to the side and stay low. You watch as one,"
+        self.threshold2 = "You roll to the side and stay low. You watch as one, two,"
+        self.threshold3 = "You roll to the side and stay low. You watch as one, two, three bats fly by you."
+        self.threshold4 = "You roll to the side and stay low. You watch as one, two, three bats fly by you. Soon after, a fourth bat passes by followed by the rest of them."
+        self.threshold5 = "You roll to the side and stay low. You watch as one, two, three bats fly by you. Soon after, a fourth bat passes by followed by the rest of them. They fly by you like a very fast gust of wind."
+        self.threshold6 = "You roll to the side and stay low. You watch as one, two, three bats fly by you. Soon after, a fourth bat passes by followed by the rest of them. They fly by you like a very fast gust of wind. You stand back up. There is a faint light from the area where the bats were, but you don't know what might await you there."
+        self.evaded_label = Label(
+            text="",
+            font_size="22sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=self.brown,
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.evaded_label)
+        self.layout.add_widget(self.skip_button)
+        self.skip_button.bind(on_press=self.skip_evaded)
+        self.current_skip_func = self.skip_evaded
         
+        self.type_write_evaded = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.evaded_text, self.evaded_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.2
+        self.pause_evaded = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_evaded, 0.3, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 + 0.1
+        self.pause_evaded2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_evaded, 0.3, self.threshold2), pause_time2)
+        pause_time3 = len(self.threshold3) * 0.05 + 0.4
+        self.pause_evaded3 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_evaded, 0.6, self.threshold3), pause_time3)
+        pause_time4 = len(self.threshold4) * 0.05 + 0.9
+        self.pause_evaded4 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_evaded, 0.5, self.threshold4), pause_time4)
+        pause_time5 = len(self.threshold5) * 0.05 + 1.4
+        self.pause_evaded5 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_evaded, 0.5, self.threshold5), pause_time5)
+        pause_time6 = len(self.threshold6) * 0.05 + 1.7
+        if self.effects_on:
+            self.bats_pass = Clock.schedule_once(self.bat_stop, pause_time5 + 0.5)
+        self.pause_evaded6 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_evaded, 1, self.threshold6), pause_time6)
+        schedule_time = len(self.evaded_text) * 0.05 + 3
+        self.evasion_option = Clock.schedule_once(self.evade_options, schedule_time)
+        
+    def evade_options(self, dt):
+        self.forward = Button(
+            text="Go towards the light",
+            font_size="24sp",
+            size_hint=(1, 0.2),
+            pos_hint={'center_x': 0.5, 'center_y': 0.1},
+            background_color = self.brown
+        )
+        
+        self.backward = Button(
+            text="Go back",
+            font_size="24sp",
+            size_hint=(1, 0.2),
+            pos_hint={'center_x': 0.5, 'center_y': 0.3},
+            background_color = self.brown
+        )
+        
+        self.layout.add_widget(self.forward)
+        self.layout.add_widget(self.backward)    
+    
+    def skip_evaded(self, dt):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_write_evaded.cancel()
+            self.pause_evaded.cancel()
+            self.pause_evaded2.cancel()
+            self.pause_evaded3.cancel()
+            self.pause_evaded4.cancel()
+            self.pause_evaded5.cancel()
+            self.pause_evaded6.cancel()
+            if self.effects_on:
+                self.bats_pass.cancel()
+                Clock.schedule_once(self.bat_stop, 0)
+            self.evasion_option.cancel()
+            self.char_index = 0
+            Clock.schedule_once(self.evade_options, 0)
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)    
+    
     def play_bats(self, dt):
         self.bat_sound.volume = 0.1
         self.bat_sound2.volume = 0.1
@@ -748,7 +899,7 @@ class AdventureApp(App):
         Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_jumped, 0.5, self.threshold2), pause_timing2)
         self.threshold3 = "You try to jump over the cracking ground. You look below you, the ground crumbles under your feet. You extend your arm forward trying to grab the ledge."
         pause_timing3 = (len(self.jumped_text) - len("your fingers slip")) * 0.05 + 1
-        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_jumped, 3.5), pause_timing3)
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_jumped, 3.5, self.threshold3), pause_timing3)
         death_timing = pause_timing3 + len("your fingers slip.") * 0.05 + 5
         self.cod = "fell to doom"
         Clock.schedule_once(lambda dt: self.game_over(dt, self.grapple_path), death_timing)
