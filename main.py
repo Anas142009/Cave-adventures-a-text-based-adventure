@@ -100,6 +100,16 @@ class AdventureApp(App):
             self.crush.volume = 1
             self.crush.loop = False
             
+        self.shot = SoundLoader.load("assets/guntrap.mp3")
+        if self.shot:
+            self.shot.volume = 1
+            self.shot.loop = False
+            
+        self.slamdoor = SoundLoader.load("assets/slamdoor.mp3")
+        if self.slamdoor:
+            self.slamdoor.volume = 1
+            self.slamdoor.loop = False
+            
         self.layout = FloatLayout()
         
         #(set all default values here:-
@@ -261,6 +271,16 @@ class AdventureApp(App):
         self.layout.add_widget(self.quit_button)
         self.layout.add_widget(self.start_button)
         self.layout.add_widget(self.gamename)
+         #REMOVE AFTER TESTING:(
+        self.test_btn = Button(
+            text="test",
+            size_hint=(0.1, 0.05),
+            pos_hint={'x': 0, 'top': 0.95},
+            font_size="9sp"
+        )
+        self.test_btn.bind(on_press=self.myroom)
+        self.layout.add_widget(self.test_btn)
+        #)
         
         
         if self.ambience_on == True:
@@ -433,6 +453,10 @@ class AdventureApp(App):
             self.add_pit_options.cancel()
             self.pause_type_write.cancel()
             self.pause_type_write2.cancel()
+            try:
+                self.resumption.cancel()
+            except:
+                pass
             self.layout.remove_widget(self.skip_button)
             self.skip_button.unbind(on_press=self.skip_pit)
             self.char_index = 0
@@ -475,7 +499,7 @@ class AdventureApp(App):
         self.threshold2="You grapple back to the area where the bats attacked you."
         self.grappled2_label = Label(
             text="",
-            font_size="28sp",
+            font_size="30sp",
             size_hint=(1, 0.6),
             pos_hint={'x': 0,  'top': 0.95},
             text_size=(Window.width * 0.9, Window.height * 0.6),
@@ -514,6 +538,10 @@ class AdventureApp(App):
                 self.play_grap.cancel()
                 self.play_grapB.cancel()
             self.batted_options.cancel()
+            try:
+                self.resumption.cancel()
+            except:
+                pass
             self.char_index = 0
             Clock.schedule_once(self.evade_options, 0)
             self.skip_button.unbind(on_press=self.current_skip_func)
@@ -729,6 +757,7 @@ class AdventureApp(App):
             pos_hint={'center_x': 0.5, 'center_y': 0.1},
             background_color = self.brown
         )
+        self.forward.bind(on_press=self.myroom)
         
         self.backward = Button(
             text="Go back",
@@ -737,6 +766,7 @@ class AdventureApp(App):
             pos_hint={'center_x': 0.5, 'center_y': 0.3},
             background_color = self.brown
         )
+        self.backward.bind(on_press=self.head_back)
         
         self.layout.add_widget(self.forward)
         self.layout.add_widget(self.backward)    
@@ -756,6 +786,10 @@ class AdventureApp(App):
                 Clock.schedule_once(self.bat_stop, 0)
             self.evasion_option.cancel()
             self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
             Clock.schedule_once(self.evade_options, 0)
             self.skip_button.unbind(on_press=self.current_skip_func)
             self.layout.remove_widget(self.skip_button)
@@ -763,6 +797,98 @@ class AdventureApp(App):
             self.char_index = 0
             self.skip_button.unbind(on_press=self.current_skip_func)
             self.layout.remove_widget(self.skip_button)    
+    
+    def head_back(self, instance):
+        self.layout.clear_widgets()
+        self.headed_text = "After a long moment of thought, you decide that it's not worth the risk. You turn back around and grapple back to the fork."
+        self.headed_label = Label(
+            text="",
+            color=self.brown,
+            font_size="28sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.headed_label)
+        self.current_skip_func = self.skip_head
+        self.skip_button.bind(on_press=self.skip_head)
+        self.layout.add_widget(self.skip_button)
+        
+        self.type_write_head = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.headed_text, self.headed_label), 0.05)
+        schedule_time = len(self.headed_text) * 0.05
+        self.headcont = Clock.schedule_once(lambda dt: self.add_continue(dt, self.start_game), schedule_time)
+    
+    def skip_head(self, dt):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_write_head.cancel()
+            self.headcont.cancel()
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            Clock.schedule_once(lambda dt: self.add_continue(dt, self.start_game), 0)
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+    
+    def myroom(self, instance):
+        self.layout.clear_widgets()
+        self.myroom_text = """You walk towards the light. Your eyes open wide, your heart starts racing, you don't know what to make of the scene in front of you. "A room?" You ask yourself, "What's a room doing inside a cave??" You ponder. As you keep examining the room, it looks nothing short of an ordinary room, a sofa, two chairs, a table, and even a rug under the table. Your mind is jumbled, you are more confused than you've ever been. You step into the room, a big metal shutter closes the opening behind you. You try to lift it back up, bang on it, or even find a button next to it. Nothing, it appears you have been locked in here. On the table to the far western wall of the room, a tape recorder sits, with a tape labeled "play me". You take a moment to consider your actions. """
+        self.threshold = """You walk towards the light. Your eyes open wide, your heart starts racing, you don't know what to make of the scene in front of you."""
+        self.threshold2 = """You walk towards the light. Your eyes open wide, your heart starts racing, you don't know what to make of the scene in front of you. "A room?" You ask yourself, "What's a room doing inside a cave??" You ponder."""
+        self.threshold3 = """You walk towards the light. Your eyes open wide, your heart starts racing, you don't know what to make of the scene in front of you. "A room?" You ask yourself, "What's a room doing inside a cave??" You ponder. As you keep examining the room, it looks nothing short of an ordinary room, a sofa, two chairs, a table, and even a rug under the table. """
+        self.threshold4 = """You walk towards the light. Your eyes open wide, your heart starts racing, you don't know what to make of the scene in front of you. "A room?" You ask yourself, "What's a room doing inside a cave??" You ponder. As you keep examining the room, it looks nothing short of an ordinary room, a sofa, two chairs, a table, and even a rug under the table. Your mind is jumbled, you are more confused than you've ever been. You step into the room, """
+        self.threshold5 = """You walk towards the light. Your eyes open wide, your heart starts racing, you don't know what to make of the scene in front of you. "A room?" You ask yourself, "What's a room doing inside a cave??" You ponder. As you keep examining the room, it looks nothing short of an ordinary room, a sofa, two chairs, a table, and even a rug under the table. Your mind is jumbled, you are more confused than you've ever been. You step into the room, a big metal shutter closes the opening behind you. """
+        self.threshold6 = """You walk towards the light. Your eyes open wide, your heart starts racing, you don't know what to make of the scene in front of you. "A room?" You ask yourself, "What's a room doing inside a cave??" You ponder. As you keep examining the room, it looks nothing short of an ordinary room, a sofa, two chairs, a table, and even a rug under the table. Your mind is jumbled, you are more confused than you've ever been. You step into the room, a big metal shutter closes the opening behind you. You try to lift it back up, bang on it, or even find a button next to it. Nothing, it appears you have been locked in here."""
+        self.threshold7 = """You walk towards the light. Your eyes open wide, your heart starts racing, you don't know what to make of the scene in front of you. "A room?" You ask yourself, "What's a room doing inside a cave??" You ponder. As you keep examining the room, it looks nothing short of an ordinary room, a sofa, two chairs, a table, and even a rug under the table. Your mind is jumbled, you are more confused than you've ever been. You step into the room, a big metal shutter closes the opening behind you. You try to lift it back up, bang on it, or even find a button next to it. Nothing, it appears you have been locked in here. On the table to the far western wall of the room, a tape recorder sits, with a tape labeled "play me"."""
+        self.myroom_label = Label(
+            text="",
+            font_size="17sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.myroom_image = Image(
+            source="assets/roomimage.jpg",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.7},
+            allow_stretch = True,
+            keep_ratio = False
+        )
+        self.myroom_image.opacity = 0
+        self.layout.add_widget(self.myroom_image)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.myroom_label)
+        
+        self.type_write_room = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.myroom_text, self.myroom_label), 0.05)
+        
+        pause_time = len(self.threshold) * 0.05 - 0.3
+        self.pause_room = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_room, 1.5, self.threshold), pause_time)
+        if self.images_on:
+            self.show_image = Clock.schedule_interval(lambda dt: self.image_appear(dt, self.myroom_image, 1), 0.5)
+        pause_time2 = len(self.threshold2) * 0.05 + 1.2
+        self.pause_room2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_room, 0.5, self.threshold2), pause_time2)
+        pause_time3 = len(self.threshold3) * 0.05 + 1.8
+        self.pause_room3 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_room, 0.5, self.threshold3), pause_time3)
+        pause_time4 = len(self.threshold4) * 0.05 + 2.3
+        self.pause_room4 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_room, 1, self.threshold4), pause_time4)
+        if self.effects_on:
+            self.slamshut = Clock.schedule_once(lambda dt: self.slamdoor.play(), pause_time4)
+        
     
     def play_bats(self, dt):
         self.bat_sound.volume = 0.1
@@ -988,6 +1114,10 @@ class AdventureApp(App):
             self.pause_gotG3.cancel()
             self.continue_G.cancel()
             self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
             Clock.schedule_once(lambda dt: self.add_continue(dt, self.grapple_over), 0)
             self.skip_button.unbind(on_press=self.skip_right)
             self.layout.remove_widget(self.skip_button)
@@ -1041,6 +1171,10 @@ class AdventureApp(App):
                 self.usegrap.cancel()
             self.continuation.cancel()
             self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
             Clock.schedule_once(lambda dt: self.add_continue(dt, self.start_game), 0)
             self.skip_button.unbind(on_press=self.current_skip_func)
             self.layout.remove_widget(self.skip_button)
@@ -1206,7 +1340,7 @@ class AdventureApp(App):
         self.typed_label.text = pause_quota
         self.char_index = len(pause_quota)
         typewrite_function.cancel()
-        Clock.schedule_once(typewrite_function, duration)
+        self.resumption = Clock.schedule_once(typewrite_function, duration)
     def typewrite(self, dt, target_text, label):
         self.typed_label = label
         self.targeted = target_text
