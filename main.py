@@ -918,6 +918,8 @@ class AdventureApp(App):
         self.pause_room4 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_room, 1, self.threshold4), pause_time4)
         if self.effects_on:
             self.slamshut = Clock.schedule_once(lambda dt: self.slamdoor.play(), pause_time4)
+        if self.ambience_on:
+            self.ambience.stop()
         pause_time5 = len(self.threshold5) * 0.05 + 1.95
         self.pause_room5 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_write_room, 0.5, self.threshold5), pause_time5)
         pause_time6 = len(self.threshold6) * 0.05 + 2.05
@@ -980,11 +982,346 @@ class AdventureApp(App):
         self.layout.add_widget(self.search)
     
     def play_tape(self, instance):
-        self.stop()
+        self.layout.clear_widgets()
+        self.tape_text = """You put in the tape and press play, "Welcome to my room." A voice speaks, seemingly changed with a voice changer. Your heart starts racing, is this the man behind it all? "As you have probably figured out by now, this whole thing was set up by us" the tape pauses for a moment, a moment that felt like ages to you. "Who is *us*? Why was this set up? How did I get into this?" A storm of thoughts brews in your head. The tape continues, "As you can see, this... *cave* is special, the tape recorder you're listening to is special, and even YOU are special." The tape pauses again, it feels like the tape is trying to psychologically torment you, and it is succeeding."""
+        self.threshold = """You put in the tape and press play, "Welcome to my room." A voice speaks, seemingly changed with a voice changer. Your heart starts racing, is this the man behind it all?"""
+        self.threshold2 = """You put in the tape and press play, "Welcome to my room." A voice speaks, seemingly changed with a voice changer. Your heart starts racing, is this the man behind it all? "As you have probably figured out by now, this whole thing was set up by us" the tape pauses for a moment, a moment that felt like ages to you. "Who is *us*? Why was this set up? How did I get into this?" A storm of thoughts brews in your head."""
+        self.threshold3 = """You put in the tape and press play, "Welcome to my room." A voice speaks, seemingly changed with a voice changer. Your heart starts racing, is this the man behind it all? "As you have probably figured out by now, this whole thing was set up by us" the tape pauses for a moment, a moment that felt like ages to you. "Who is *us*? Why was this set up? How did I get into this?" A storm of thoughts brews in your head. The tape continues, "As you can see, this... *cave* is special, the tape recorder you're listening to is special, and even YOU are special." """
+        self.tape_label = Label(
+            text="",
+            font_size="18sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=self.brown,
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.tape_label)
+        self.layout.add_widget(self.skip_button)
+        self.current_skip_func = self.skip_tape
+        self.skip_button.bind(on_press=self.skip_tape)
+        
+        self.type_tape = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.tape_text, self.tape_label), 0.06)
+        pause_time = len(self.threshold) * 0.06 - 0.5
+        self.pause_tape = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_tape, 1, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.06  
+        self.pause_tape2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_tape, 1, self.threshold2), pause_time2)
+        pause_time3 = len(self.threshold3) * 0.06 + 0.5
+        self.pause_tape3 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_tape, 1, self.threshold3), pause_time3)
+        schedule_time = len(self.tape_text) * 0.06 + 1.5
+        self.tapecont = Clock.schedule_once(lambda dt: self.add_continue(dt, self.conttape), schedule_time)    
+        
+    def skip_tape(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_tape.cancel()
+            self.pause_tape.cancel()
+            self.pause_tape2.cancel()
+            self.pause_tape3.cancel()
+            self.tapecont.cancel()
+            Clock.schedule_once(lambda dt: self.add_continue(dt, self.conttape), 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)            
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+    
+    def conttape(self, instance):
+        self.layout.clear_widgets()
+        self.continuation_text = """The tape continues, "The tape recorder you are using right now is special because only the play button works, no other buttons function" you immediately test the pause, record, and stop recording button. Nothing happens, he is right. "This place is special because, well, I'm sure you already know." He is right, the place you woke up in, the conveniently-placed holes for light, the grapple gun on a pedestal, and eventually this room, all lead you to beleive that this place was man-made. "and you, you are special because you've been chosen for this project, so be proud." "Proud? What the hell is he talking about?" You start feeling rage filling your heart, you feel like you'd kill him the instant you get a chance to."""
+        self.threshold = """The tape continues, "The tape recorder you are using right now is special because only the play button works, no other buttons function" you immediately test the pause, record, and stop recording button. Nothing happens, he is right."""
+        self.threshold2  = """The tape continues, "The tape recorder you are using right now is special because only the play button works, no other buttons function" you immediately test the pause, record, and stop recording button. Nothing happens, he is right. "This place is special because, well, I'm sure you already know." He is right, the place you woke up in, the conveniently-placed holes for light, the grapple gun on a pedestal, and eventually this room, all lead you to beleive that this place was man-made."""
+        self.threshold3 = """The tape continues, "The tape recorder you are using right now is special because only the play button works, no other buttons function" you immediately test the pause, record, and stop recording button. Nothing happens, he is right. "This place is special because, well, I'm sure you already know." He is right, the place you woke up in, the conveniently-placed holes for light, the grapple gun on a pedestal, and eventually this room, all lead you to beleive that this place was man-made. "and you,"""
+        self.continuation_label = Label(
+            text="",
+            font_size="18sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.975},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halign='left',
+            valign='top',
+            bold=True
+        )        
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.continuation_label)
+        self.current_skip_func = self.skip_tape2
+        self.layout.add_widget(self.skip_button)
+        self.skip_button.bind(on_press=self.skip_tape2)
+        
+        self.type_tape2 = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.continuation_text, self.continuation_label), 0.07)
+        pause_time = len(self.threshold) * 0.07 - 0.7
+        self.pause_tape = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_tape2, 0.8, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.07 - 0.4 
+        self.pause_tape2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_tape2, 0.8, self.threshold2), pause_time2)
+        pause_time3 = len(self.threshold3)  * 0.07 + 0.4
+        self.pause_tape3 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_tape2, 1.5, self.threshold3), pause_time3)
+        schedule_time = len(self.continuation_text) * 0.07 + 1.9
+        self.tape2cont = Clock.schedule_once(lambda dt: self.add_continue(dt, self.tape3), schedule_time) 
+    
+    def skip_tape2(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_tape2.cancel()
+            self.pause_tape.cancel()
+            self.pause_tape2.cancel()
+            self.pause_tape3.cancel()
+            self.tape2cont.cancel()
+            Clock.schedule_once(lambda dt: self.add_continue(dt, self.tape3), 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)            
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+    
+    def tape3(self, instance):
+        self.layout.clear_widgets()
+        self.tape3_text = """ "There is another reason for why this recorder is special," the tape continues, "it might give you a way out." As soon as you hear that, your heart feels lightened. You don't quite understand the feeling you've just felt, but it's definitely good. "When this recording finishes, a puzzle shall reveal itself to you. Solve it correctly, and you shall survive; However," The tape pauses. The pause freaks you out. Your heart is racing rapidly, thinking about what the next sentence could be makes you feel sick. Just the thought of it torments you."""
+        self.threshold = """ "There is another reason for why this recorder is special," the tape continues, "it might give you a way out." As soon as you hear that, your heart feels lightened. You don't quite understand the feeling you've just felt, but it's definitely good."""
+        self.threshold2 = """ "There is another reason for why this recorder is special," the tape continues, "it might give you a way out." As soon as you hear that, your heart feels lightened. You don't quite understand the feeling you've just felt, but it's definitely good. "When this recording finishes, a puzzle shall reveal itself to you. Solve it correctly, and you shall survive; However," The tape pauses."""
+        self.tape3_label = Label(
+            text="",
+            font_size="20sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.tape3_label)
+        self.layout.add_widget(self.skip_button)
+        self.current_skip_func = self.skip_tape3
+        self.skip_button.bind(on_press=self.skip_tape3)
+        
+        self.type_tape3 = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.tape3_text, self.tape3_label), 0.07)
+        pause_time = len(self.threshold) * 0.07 - 0.8
+        self.pause_tape = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_tape3, 1, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.07
+        self.pause_tape2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_tape3, 0.75, self.threshold2), pause_time2)
+        schedule_time = len(self.tape3_text) * 0.07 + 1
+        self.continue_tape = Clock.schedule_once(lambda dt: self.add_continue(dt, self.puzzle_reveal), schedule_time)
+        
+    def skip_tape3(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_tape3.cancel()
+            self.pause_tape.cancel()
+            self.pause_tape2.cancel()
+            self.continue_tape.cancel()
+            Clock.schedule_once(lambda dt: self.add_continue(dt, self.puzzle_reveal), 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)            
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        
+    def puzzle_reveal(self, instance):
+        self.layout.clear_widgets()
+        self.puzzle_text = """ "May you solve it incorrectly, your survival is not guaranteed, in fact, your doom is almost certain." You feel your heart drop to your knees, that last sentence made you feel emminent danger. "Think hard, solve carefully. The puzzle is definitely solveable, and remember, only make your choice when you're sure of your answer. Good luck!" The tape finishes, and as soon as it does, the wall in front of you opens like an elevator door. Behind it is a screen with instructions, it appears that this is the puzzle he was referring to."""
+        self.threshold=""" "May you solve it incorrectly, your survival is not guaranteed, in fact, your doom is almost certain." You feel your heart drop to your knees, that last sentence made you feel emminent danger."""
+        self.threshold2 = """ "May you solve it incorrectly, your survival is not guaranteed, in fact, your doom is almost certain." You feel your heart drop to your knees, that last sentence made you feel emminent danger. "Think hard, solve carefully. The puzzle is definitely solveable, and remember, only make your choice when you're sure of your answer. Good luck!" The tape finishes, and as soon as it does, the wall in front of you opens like an elevator door."""
+        self.puzzle_label = Label(
+            text="",
+            font_size="20sp",
+            color=self.brown,
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.puzzle_label)
+        self.current_skip_func = self.skip_puzzle
+        self.skip_button.bind(on_press=self.skip_puzzle)
+        self.layout.add_widget(self.skip_button)
+        
+        self.type_puzzle = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.puzzle_text, self.puzzle_label), 0.06)
+        pause_time = len(self.threshold) * 0.06 - 0.7
+        self.pause_puzzle = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_puzzle, 0.7, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.06 - 0.1
+        self.pause_puzzle2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_puzzle, 0.7, self.threshold2), pause_time2)
+        schedule_time = len(self.puzzle_text) * 0.06 + 0.85
+        self.riddle_time = Clock.schedule_once(lambda dt: self.add_continue(dt, self.riddle), schedule_time)
+    
+    def skip_puzzle(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_puzzle.cancel()
+            self.pause_puzzle.cancel()
+            self.pause_puzzle2.cancel()
+            self.riddle_time.cancel()
+            Clock.schedule_once(lambda dt: self.add_continue(dt, self.riddle), 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)            
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        
+    def riddle(self, instance):
+        self.layout.clear_widgets()
+        self.riddle_text = """You take a deep breath and start reading the instructions. "Below, is a riddle. Press the correct button, and you win. press the wrong button, and you lose. Press both buttons at once and you lose. Remember, only press when you're sure." You look down, you see two buttons labeled 'left' and 'right'. Between them lies a piece of paper that reads, "I may seem long, but I am short. If you walk with me, I rumble. Soon after that, I crumble. What am I?" At first this seems like a sick joke, but you decide to think about an actual solution anyway. Which button do you press?"""
+        self.riddle_label = Label(
+            text="",
+            font_size="20sp",
+            color=self.brown,
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.riddle_image = Image(
+            source="assets/buttons.jpg",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+        )
+        if self.images_on:
+            self.layout.add_widget(self.riddle_image)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.riddle_label)
+        self.layout.add_widget(self.skip_button)
+        self.current_skip_func = self.skip_riddle
+        self.skip_button.bind(on_press=self.skip_riddle)
+        
+        self.type_riddle = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.riddle_text, self.riddle_label), 0.05)
+        schedule_time = len(self.riddle_text) * 0.05
+        self.solving = Clock.schedule_once(self.solve_riddle, schedule_time)
+    
+    def skip_riddle(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_riddle.cancel()
+            self.solving.cancel()
+            Clock.schedule_once(self.solve_riddle, 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)            
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+    
+    def solve_riddle(self, dt):
+        self.correct = False
+        self.left_btn = Button(
+            text="left",
+            font_size="24sp",
+            size_hint=(0.3, 0.2),
+            pos_hint={'x': 0.1, 'center_y': 0.2},
+            background_color=self.brown
+        )
+        self.left_btn.bind(on_press=self.wrong)
+        self.left_btn.bind(on_press=self.solution)
+        
+        self.right_btn = Button(
+            text="right",
+            font_size="24sp",
+            size_hint=(0.3, 0.2),
+            pos_hint={'x': 0.6, 'center_y': 0.2},
+            background_color=self.brown
+        )
+        self.right_btn.bind(on_press=self.Ranswer)
+        self.right_btn.bind(on_press=self.solution)
+        
+        self.layout.add_widget(self.left_btn)
+        self.layout.add_widget(self.right_btn)
+    
+    def Ranswer(self, instance):
+        self.correct = True
+        
+    def wrong(self, instance):
+        self.correct = False
+    
+    def solution(self, instance):
+        self.layout.clear_widgets()
+        if self.correct:
+            self.solution_text = ""
+        else:
+            self.solution_text = ""
     
     def searched(self, instance):
-        self.stop()
+        self.layout.clear_widgets()
+        self.searched_text = "You decide to look around for other exits. You were too shocked to realize at first, but this room doesn't have any windows. You search under the rugs, the sofas, behind the walls, nothing. You tear apart the sofa's cloth, and start extracting its guts, nothing. You search every portion of the room, the room looks like a tornado hit it now, but still nothing. You stand one of the chairs back up and sit on it. You decide to play the tape."
+        self.searched_label = Label(
+            text="",
+            font_size="22sp",
+            size_hint=(1, 0.6),
+            color=self.brown,
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        if self.images_on:
+            self.layout.add_widget(self.myroom_image)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.searched_label)
+        self.current_skip_func = self.skip_search
+        self.layout.add_widget(self.skip_button)
+        self.skip_button.bind(on_press=self.skip_search)
         
+        self.type_write_search = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.searched_text, self.searched_label), 0.05)
+        schedule_time = len(self.searched_text) * 0.05
+        self.aftersearch = Clock.schedule_once(lambda dt: self.add_continue(dt, self.play_tape), schedule_time)
+    
+    def skip_search(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_write_search.cancel()
+            self.aftersearch.cancel()
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+            Clock.schedule_once(lambda dt: self.add_continue(dt, self.play_tape), 0)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+    
     def play_bats(self, dt):
         self.bat_sound.volume = 0.1
         self.bat_sound2.volume = 0.1
