@@ -304,16 +304,6 @@ class AdventureApp(App):
         self.layout.add_widget(self.quit_button)
         self.layout.add_widget(self.start_button)
         self.layout.add_widget(self.gamename)
-        #REMOVE AFTER TESTING:(
-        self.test_btn = Button(
-            text="test",
-            size_hint=(0.1, 0.05),
-            pos_hint={'x': 0, 'top': 0.95},
-            font_size="9sp"
-        )
-        self.test_btn.bind(on_press=self.myroom)
-        self.layout.add_widget(self.test_btn)
-        #)
         
         
         if self.ambience_on == True:
@@ -424,7 +414,7 @@ class AdventureApp(App):
     def big_hole(self, instance):
         self.layout.clear_widgets()
         #REMOVE    THIS    AFTER    TESTING:(
-        self.havegrapple = True
+        #self.havegrapple = True
         #)
         if self.havegrapple == True:
             self.hole_text = "You walk straight forward.\nA giant pit stops you in your path.\nYour grapple gun might get you over it, do you want to use it?"
@@ -1191,6 +1181,11 @@ class AdventureApp(App):
         
     def riddle(self, instance):
         self.layout.clear_widgets()
+        if self.ambience_on:
+            try:
+                self.ambience.stop()
+            except:
+                pass
         self.riddle_text = """You take a deep breath and start reading the instructions. "Below, is a riddle. Press the correct button, and you win. press the wrong button, and you lose. Press both buttons at once and you lose. Remember, only press when you're sure." You look down, you see two buttons labeled 'left' and 'right'. Between them lies a piece of paper that reads, "I may seem long, but I am short. If you walk with me, I rumble. Soon after that, I crumble. What am I?" At first this seems like a sick joke, but you decide to think about an actual solution anyway. Which button do you press?"""
         self.riddle_label = Label(
             text="",
@@ -1249,8 +1244,8 @@ class AdventureApp(App):
             pos_hint={'x': 0.1, 'center_y': 0.2},
             background_color=self.brown
         )
-        self.left_btn.bind(on_press=self.wrong)
         self.left_btn.bind(on_press=self.solution)
+        self.left_btn.bind(on_press=self.wrong)
         
         self.right_btn = Button(
             text="right",
@@ -1259,8 +1254,8 @@ class AdventureApp(App):
             pos_hint={'x': 0.6, 'center_y': 0.2},
             background_color=self.brown
         )
-        self.right_btn.bind(on_press=self.Ranswer)
         self.right_btn.bind(on_press=self.solution)
+        self.right_btn.bind(on_press=self.Ranswer)
         
         self.layout.add_widget(self.left_btn)
         self.layout.add_widget(self.right_btn)
@@ -1273,10 +1268,67 @@ class AdventureApp(App):
     
     def solution(self, instance):
         self.layout.clear_widgets()
-        if self.correct:
-            self.solution_text = ""
+        if self.correct == True:
+            self.solution_text = """You press the right button. Your heart feels like it's about to explode, the screen shows a response. "Correct! the exit shall be revealed!", A surge of extreme happiness and relief flow inside of you. You look around for the exit, you don't see anything. You start to worry, did he lie to you? Suddenly, the northern wall of the room opens up the same way the one to the west did. A great amount of sunlight rushes in through the opening. The happiness you feel at the moment is undescribable."""
+            self.threshold = "You press the right button."
+            self.threshold2 = """You press the right button. Your heart feels like it's about to explode, the screen shows a response. "Correct! the exit shall be revealed!", A surge of extreme happiness and relief flow inside of you. You look around for the exit, you don't see anything."""
+            self.threshold3 = """You press the right button. Your heart feels like it's about to explode, the screen shows a response. "Correct! the exit shall be revealed!", A surge of extreme happiness and relief flow inside of you. You look around for the exit, you don't see anything. You start to worry, did he lie to you? Suddenly,"""
+            self.solution_label = Label(
+                text="",
+                font_size="19sp",
+                size_hint=(1, 0.6),
+                pos_hint={'x': 0, 'top': 0.95},
+                color=self.brown,
+                text_size=(Window.width * 0.9, Window.height * 0.6),
+                halign='left',
+                valign='top',
+                bold=True
+            )
+            self.layout.add_widget(self.text_background)
+            self.layout.add_widget(self.solution_label)
+            
+            self.type_solution = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.solution_text, self.solution_label), 0.06)
+            pause_time = len(self.threshold) * 0.06 - 0.1
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_solution, 2, self.threshold), pause_time)
+            pause_time2 = len(self.threshold2) * 0.06 + 1
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_solution, 0.75, self.threshold2), pause_time2)
+            pause_time3 = len(self.threshold3) * 0.06 + 1.7
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_solution, 0.6, self.threshold3), pause_time3)
+            schedule_time = len(self.solution_text) * 0.06 + 3
+            self.exit_num = "1"
+            Clock.schedule_once(lambda dt: self.add_continue(dt, self.victory_scene), schedule_time)
         else:
-            self.solution_text = ""
+            self.solution_text = """You press the left button. Your heart feels like it's about to explode, the screen shows a response. "Incorrect" Your heart drops, you feel as if the whole world is ending. You hear a clicking sound behind you, you turn around. Before you get a chance to react, a burst of bullets pierce you like a piece of paper. The bullets came from three machine guns, hidden behind a door-like eastern wall, similar to the wall to the west. You are now as full of holes as a sponge."""
+            self.threshold = "You press the left button."
+            self.threshold2 = """You press the left button. Your heart feels like it's about to explode, the screen shows a response. "Incorrect" Your heart drops, you feel as if the whole world is ending. You hear a clicking sound behind you, you turn around."""
+            self.solution_label = Label(
+                text="",
+                font_size="22sp",
+                size_hint=(1, 0.6),
+                pos_hint={'x': 0, 'top': 0.95},
+                color=self.brown,
+                text_size=(Window.width * 0.9, Window.height * 0.6),
+                halign='left',
+                valign='top',
+                bold=True
+            )
+            self.layout.add_widget(self.text_background)
+            self.layout.add_widget(self.solution_label)
+            self.type_solution = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.solution_text, self.solution_label), 0.05)
+            pause_time = len(self.threshold) * 0.05
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_solution, 2, self.threshold), pause_time)
+            pause_time2 = len(self.threshold2) * 0.05 + 1.5
+            if self.effects_on:
+                Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_solution, 2, self.threshold2), pause_time2)
+                Clock.schedule_once(lambda dt: self.shot.play(), pause_time2)
+                schedule_time = len(self.solution_text) * 0.05 + 4
+            else:
+                Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_solution, 1, self.threshold2), pause_time2)
+                schedule_time = len(self.solution_text) * 0.05 + 3
+            self.cod = "shot to death"
+            Clock.schedule_once(lambda dt: self.game_over(dt, self.riddle), schedule_time)
+                
+            
     
     def searched(self, instance):
         self.layout.clear_widgets()
@@ -1906,6 +1958,116 @@ class AdventureApp(App):
         self.layout.add_widget(self.main_menu_button)
         self.layout.add_widget(self.retry_btn)
         
+    def victory_scene(self, instance):
+        self.layout.clear_widgets()
+        self.scenery_text = "You walk out the opening. You see the path going downwards. It appears that this *cave* is built on a mountain. You follow the path downwards towards the very beutiful sunshine. You embrace the sunlight as you walk downward, even the birds chirping sounds like music to your ears. So many unanswered questions remain, yet you stopped caring. You're just happy you're alive."
+        self.scenery_label = Label(
+            text="",
+            font_size="24sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            color=[0, 0.5, 0.5, 1],
+            bold=True
+        )
+        self.layout.add_widget(self.scenery_label)
+        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.scenery_text, self.scenery_label), 0.06)
+        schedule_time = len(self.scenery_text) * 0.06 + 1.5
+        Clock.schedule_once(self.victory, schedule_time)
+    
+    def victory(self, dt):
+        self.layout.clear_widgets()
+        if self.ambience:
+            try:
+                self.ambience.stop()
+            except:
+                pass
+            self.vic_ambience.volume = 0
+            self.vic_ambience2.volume = 0            
+            self.vic_ambience.play()
+            self.vic_ambience2.play()
+            self.victorySFX = Clock.schedule_interval(lambda dt: self.amplification(dt, self.vic_ambience, 0.8), 0.5)
+            self.victorySFX2 = Clock.schedule_interval(lambda dt: self.amplification(dt, self.vic_ambience2, 0.8), 0.5)
+        
+        self.vic_label = Label(
+            text="You escaped",
+            font_size="50sp",
+            size_hint=(1, 0.25),
+            pos_hint={'center_x': 0.5, 'top': 0.99},
+            color=[0, 0.25, 1, 1],
+            text_size=(Window.width * 0.9, Window.height * 0.25),
+            halign='center',
+            valign='top'
+        )
+        self.death_no = str(self.death_count)
+        self.died_no = Label(
+            text=f"Died {self.death_no} times",
+            font_size="24sp",
+            size_hint=(1, 0.1),
+            color=[1, 0, 0, 1],
+            pos_hint={'center_x': 0.5, 'top': 0.92},
+            text_size=(Window.width * 0.9, Window.height * 0.1),
+            halign='center',
+            valign='top'
+        )
+        self.exit_no = Label(
+            text=f"Exit {self.exit_num} of 3",
+            font_size="24sp",
+            size_hint=(1, 0.1),
+            color=[1, 0.1, 0.1, 1],
+            pos_hint={'center_x': 0.5, 'top': 0.87},
+            text_size=(Window.width * 0.9, Window.height * 0.1),
+            halign='center',
+            valign='top'    
+        )
+        self.vic_image = Image(
+            source="assets/Victory.png",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+        )
+        self.main_menu_btn = Button(
+            text="Back to main menu",
+            font_size="22sp",
+            size_hint=(0.6, 0.2),
+            pos_hint={'center_x': 0.5, 'center_y': 0.2},
+            background_color=self.brown
+        )
+        self.main_menu_btn.bind(on_press=self.main_menu)
+        self.main_menu_btn.bind(on_press=self.resetdeaths)
+        if self.ambience_on:
+            self.main_menu_btn.bind(on_press=self.end_win)
+        
+        self.vic_label.opacity = 0
+        self.died_no.opacity = 0
+        self.exit_no.opacity = 0
+        if self.images_on:
+            self.vic_image.opacity = 0
+            self.layout.add_widget(self.vic_image)
+            self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.vic_label)
+        self.layout.add_widget(self.died_no)
+        self.layout.add_widget(self.exit_no)
+        Clock.schedule_interval(lambda dt: self.image_appear(dt, self.vic_label, 1), 0.1)
+        Clock.schedule_interval(lambda dt: self.image_appear(dt, self.died_no, 1), 0.2)
+        Clock.schedule_interval(lambda dt: self.image_appear(dt, self.exit_no, 1), 0.2)
+        if self.images_on:
+            Clock.schedule_interval(lambda dt: self.image_appear(dt, self.vic_image, 1), 0.2)
+        Clock.schedule_once(lambda dt: self.layout.add_widget(self.main_menu_button), 2.5)
+        
+    def resetdeaths(self, instance):
+        self.death_count = 0
+    
+    def end_win(self, instance):
+        self.victorySFX.cancel()
+        self.victorySFX2.cancel()
+        self.vic_ambience.stop()
+        self.vic_ambience2.stop()
+        
+    
     def make_appearance(self, dt, target_image, target_opacity, interval):
         Clock.schedule_interval(lambda dt: self.image_appear(dt, target_image, target_opacity), interval)
         
