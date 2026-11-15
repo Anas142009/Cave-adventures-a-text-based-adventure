@@ -110,6 +110,16 @@ class AdventureApp(App):
             self.slamdoor.volume = 1
             self.slamdoor.loop = False
             
+        self.bouldercrash = SoundLoader.load("assets/Bouldercrash.mp3")
+        if self.bouldercrash:
+            self.bouldercrash.volume = 1
+            self.bouldercrash.loop = False
+            
+        self.click = SoundLoader.load("assets/click.mp3")
+        if self.click:
+            self.click.volume = 1
+            self.click.loop = False
+            
         self.layout = FloatLayout()
         
         #(set all default values here:-
@@ -304,6 +314,16 @@ class AdventureApp(App):
         self.layout.add_widget(self.quit_button)
         self.layout.add_widget(self.start_button)
         self.layout.add_widget(self.gamename)
+        #REMOVE AFTER TESTING:(
+        self.test_btn = Button(
+            text="test",
+            size_hint=(0.1, 0.05),
+            pos_hint={'x': 0, 'top': 0.95},
+            font_size="9sp"
+        )
+        self.test_btn.bind(on_press=self.puzzle_reveal)
+        self.layout.add_widget(self.test_btn)
+        #)
         
         
         if self.ambience_on == True:
@@ -413,9 +433,6 @@ class AdventureApp(App):
 
     def big_hole(self, instance):
         self.layout.clear_widgets()
-        #REMOVE    THIS    AFTER    TESTING:(
-        #self.havegrapple = True
-        #)
         if self.havegrapple == True:
             self.hole_text = "You walk straight forward.\nA giant pit stops you in your path.\nYour grapple gun might get you over it, do you want to use it?"
         else:
@@ -653,7 +670,7 @@ class AdventureApp(App):
     def add_bat_options(self, dt):
         self.fend_off = Button(
             text="Try to fend them off using the grapple gun",
-            font_size="22sp",
+            font_size="20sp",
             size_hint=(1, 0.2),
             pos_hint={'center_x': 0.5, 'center_y': 0.1},
             background_color=self.brown
@@ -1154,7 +1171,7 @@ class AdventureApp(App):
         self.type_puzzle = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.puzzle_text, self.puzzle_label), 0.06)
         pause_time = len(self.threshold) * 0.06 - 0.7
         self.pause_puzzle = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_puzzle, 0.7, self.threshold), pause_time)
-        pause_time2 = len(self.threshold2) * 0.06 - 0.1
+        pause_time2 = len(self.threshold2) * 0.06 - 0.55
         self.pause_puzzle2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_puzzle, 0.7, self.threshold2), pause_time2)
         schedule_time = len(self.puzzle_text) * 0.06 + 0.85
         self.riddle_time = Clock.schedule_once(lambda dt: self.add_continue(dt, self.riddle), schedule_time)
@@ -1718,8 +1735,302 @@ class AdventureApp(App):
             self.crack.play()
         
     def long_path(self, instance):
-        self.stop()
+        self.layout.clear_widgets()
+        self.left_text = "You walk through the left opening. A few steps later, a boulder falls down behind you, blocking the opening. Your only choice is to keep going forward. A few steps later, you find yourself at a fork. The path to the left is well-lit with a bunch of holes like the ones at the first fork, but you don't see it's end at all. The path to the right is dark, but you see light coming from its end. Which path do you choose?"
+        self.threshold = "You walk through the left opening. A few steps later,"
+        self.threshold2 = "You walk through the left opening. A few steps later, a boulder falls down behind you, blocking the opening. Your only choice is to keep going forward."
+        self.left_label = Label(
+            text="",
+            font_size="24sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        if self.images_on:
+            self.fork_image.opacity = 0
+            self.layout.add_widget(self.fork_image)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.left_label)
+        self.current_skip_func = self.skip_left
+        self.skip_button.bind(on_press=self.skip_left)
+        self.layout.add_widget(self.skip_button)
+                
+        self.type_left = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.left_text, self.left_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.2
+        self.pause_left = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_left, 1, self.threshold), pause_time)
+        if self.effects_on:
+            self.lockout = Clock.schedule_once(lambda dt: self.bouldercrash.play(), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 + 0.55
+        self.pause_left2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_left, 0.75, self.threshold2), pause_time2)
+        if self.images_on:
+            self.fork_image.source = "assets/fork2.jpg"
+            self.arawareru = Clock.schedule_once(lambda dt: self.make_appearance(dt, self.fork_image, 0.8, 0.1), pause_time2)
+            schedule_time = len(self.left_text) * 0.05 + 1.8
+            self.left_options = Clock.schedule_once(self.lefty, schedule_time)
         
+    def skip_left(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_left.cancel()
+            self.pause_left.cancel()
+            self.pause_left2.cancel()
+            if self.effects_on:
+                try:
+                    self.lockout.cancel()
+                except:
+                    pass
+            if self.images_on:
+                try:
+                    self.arawareru.cancel()
+                except:
+                    pass
+            self.left_options.cancel()
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            Clock.schedule_once(self.lefty, 0) 
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)    
+    
+    def lefty(self, dt):
+        #REMOVE    AFTER    TESTING:(
+        self.havegrapple = True
+        #)
+        self.Bpath = Button(
+            text="Go left",
+            font_size="24sp",
+            size_hint=(0.5, 0.4),
+            pos_hint={'x': 0, 'center_y': 0.2},
+            background_color = self.brown
+        )    
+        self.Bpath.bind(on_press=self.boulder)
+        self.dualroom = Button(
+            text="Go right",
+            font_size="24sp",
+            size_hint=(0.5, 0.4),
+            pos_hint={'right': 1, 'center_y': 0.2},
+            background_color=self.brown
+        )
+        self.dualroom.bind(on_press=self.two_btns)
+        self.layout.add_widget(self.Bpath)
+        self.layout.add_widget(self.dualroom)
+        
+    def boulder(self, instance):
+        self.layout.clear_widgets()
+        self.ball_text = "You decide to follow the left path. After a few steps, you realize that the path is sloping upwards gradually. The slope feels natural until, you hear a clicking sound from below your feet. Almost immediately after that, you hear weird loud noises coming from the end of the slope. You look ahead. A BOULDER! You instinctively start running down the slope, there appears to be a small opening to the left that you may be able to hide in but you can't really tell. What do you do?"
+        self.threshold = "You decide to follow the left path. After a few steps, you realize that the path is sloping upwards gradually. The slope feels natural until,"
+        self.threshold2 = "You decide to follow the left path. After a few steps, you realize that the path is sloping upwards gradually. The slope feels natural until, you hear a clicking sound from below your feet. Almost immediately after that,"
+        self.threshold3 = "You decide to follow the left path. After a few steps, you realize that the path is sloping upwards gradually. The slope feels natural until, you hear a clicking sound from below your feet. Almost immediately after that, you hear weird loud noises coming from the end of the slope. You look ahead."
+        self.ball_label = Label(
+            text="",
+            font_size="20sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            color=self.brown,
+            bold=True
+        )
+        self.ball_image = Image(
+            source="assets/boulder_trap.png",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+        )
+        if self.images_on:
+            self.ball_image.opacity = 0
+            self.layout.add_widget(self.ball_image)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.ball_label)
+        
+        self.type_ball = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.ball_text, self.ball_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.5
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_ball, 0.5, self.threshold), pause_time)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.click.play(), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 - 0.1 
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_ball, 0.5, self.threshold2), pause_time2)
+            self.boulder_sound.volume = 0
+            Clock.schedule_once(lambda dt: self.boulder_sound.play(), pause_time2)
+            Clock.schedule_once(lambda dt: self.Samplification(dt, self.boulder_sound, 1, 0.5), pause_time2)
+        if self.effects_on:
+            pause_time3 = len(self.threshold3) * 0.05 + 0.5
+        else:
+            pause_time3 = len(self.threshold3) * 0.05 - 0.15
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_ball, 0.5, self.threshold3), pause_time3)
+        if self.images_on:
+            Clock.schedule_once(lambda dt: self.make_appearance(dt, self.ball_image, 1, 0.1), pause_time3)
+        if self.effects_on:
+            schedule_time = len(self.ball_text) * 0.05 + 1.3
+        else:
+            schedule_time = len(self.ball_text) * 0.05 + 0.8
+        Clock.schedule_once(self.ballopts, schedule_time)
+        Clock.schedule_once(lambda dt: self.start_timer(dt, self.boulder, self.boulder_sound), schedule_time)
+        self.cod = "crushed to death"
+        
+    def ballopts(self, dt):
+        self.running = Button(
+            text="Just keep running",
+            font_size="22sp",
+            size_hint=(1, 0.13),
+            pos_hint={'center_x': 0.5, 'top': 0.4},
+            background_color=self.brown   
+        )
+        self.running.bind(on_press=self.ran)
+        
+        self.grappling = Button(
+            text="Try to grapple upwards, avoiding it",
+            font_size="22sp",
+            size_hint=(1, 0.13),
+            pos_hint={'center_x': 0.5, 'center_y': 0.2},
+            background_color=self.brown
+        )
+        self.grappling.bind(on_press=self.spidermanned)
+        
+        self.hide = Button(
+            text="Try to hide in the opening to the left",
+            font_size="22sp",
+            size_hint=(1, 0.13),
+            pos_hint={'center_x': 0.5, 'y': 0},
+            background_color=self.brown
+        )
+        self.hide.bind(on_press=self.hidden)
+        self.layout.add_widget(self.running)
+        self.layout.add_widget(self.hide)
+        if self.havegrapple:
+            self.layout.add_widget(self.grappling)
+    
+    def spidermanned(self, instance):
+        self.layout.clear_widgets()
+        self.qte.cancel()
+        self.spiderman_text = "You take out your grapple gun and shoot it upwards. You pull yourself upwards, the boulder scrapes your feet as it passes by. The boulder crashes onto the wall, blocking off the path backwards. You drop back down, you see what appears to be a big are behind where the boulder was, it seems that's your only path, so you take it."
+        self.threshold = "You take out your grapple gun and shoot it upwards."
+        self.threshold2 = "You take out your grapple gun and shoot it upwards. You pull yourself upwards, the boulder scrapes your feet as it passes by."
+        self.threshold3 = "You take out your grapple gun and shoot it upwards. You pull yourself upwards, the boulder scrapes your feet as it passes by. The boulder crashes onto the wall, blocking off the path backwards."
+        self.spiderman_label = Label(
+            text="",
+            font_size="20sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=self.brown,
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.spiderman_label)
+        
+        self.type_spider = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.spiderman_text, self.spiderman_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.2
+        if self.effects_on: 
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_spider, 3.2, self.threshold), pause_time)
+            Clock.schedule_once(lambda dt: self.grapple.play(), pause_time)
+            Clock.schedule_once(lambda dt: self.grapple_back.play(), pause_time + 3.2)
+            Clock.schedule_once(lambda dt: self.grapple_back.stop(), pause_time + 5)
+            pause_time2 = len(self.threshold2) * 0.05 + 3.2
+            self.impact.volume = 0.05
+            Clock.schedule_once(lambda dt: self.boulder_sound.stop(), pause_time2)
+            Clock.schedule_once(lambda dt: self.impact.play(), pause_time2)
+            Clock.schedule_once(lambda dt: self.bouldercrash.play(), pause_time2)
+            pause_time3 = len(self.threshold3) * 0.05 + 3.7
+            schedule_time = len(self.spiderman_text) * 0.05 + 4.2
+        else:
+            pause_time2 = len(self.threshold2) * 0.05 - 0.2
+            pause_time3 = len(self.threshold3) * 0.05 + 0.3
+            schedule_time = len(self.spiderman_text) * 0.05 + 0.8
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_spider, 0.5, self.threshold2), pause_time2)
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_spider, 0.5, self.threshold3), pause_time3)
+        Clock.schedule_once(lambda dt: self.add_continue(dt, self.puzzleroom), schedule_time)
+    
+    def puzzleroom(self, instance):
+        self.layout.clear_widgets()
+    
+    def ran(self, instance):
+        self.qte.cancel()
+        self.layout.clear_widgets()
+        self.ran_text="You keep running as fast as you can. You soon find yourself going towards the right opening in the fork you were just in. the boulder crashes into the wall in front of you, it was really close. The dust settles, the boulder appears to have blocked off the path to the left and back, your only choice is to follow this path to the right."
+        self.threshold = "You keep running as fast as you can. You soon find yourself going towards the right opening in the fork you were just in."
+        self.threshold2 = "You keep running as fast as you can. You soon find yourself going towards the right opening in the fork you were just in. the boulder crashes into the wall in front of you, it was really close."
+        self.ran_label = Label(
+            text="",
+            font_size="20sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            color=self.brown,
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.ran_label)
+        
+        self.type_ran = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.ran_text, self.ran_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.4
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_ran, 1, self.threshold), pause_time)
+            Clock.schedule_once(lambda dt: self.boulder_sound.stop(), pause_time)
+            Clock.schedule_once(lambda dt: self.bouldercrash.play(), pause_time)
+            self.impact.volume = 0.05
+            Clock.schedule_once(lambda dt: self.impact.play(), pause_time)
+        if self.effects_on:
+            pause_time2 = len(self.threshold2) * 0.05 + 0.1
+        else:
+            pause_time2 = len(self.threshold2) * 0.05 - 0.6
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_ran, 0.5, self.threshold2), pause_time2)
+        if self.effects_on:
+            schedule_time = len(self.ran_text) * 0.05 + 0.5
+        else:
+            schedule_time = len(self.ran_text) * 0.05 + 0.2
+        Clock.schedule_once(lambda dt: self.add_continue(dt, self.two_btns), schedule_time)
+    
+    def hidden(self, instance):
+        self.qte.cancel()
+        self.layout.clear_widgets()
+        self.hidden_text="You run towards the opening and shove yourself in it. You get stuck. The hole is too small for your whole body, so you attempt to pull yourself out. You succeed; However, it's too late."
+        self.threshold = "You run towards the opening and shove yourself in it."
+        self.threshold2 = "You run towards the opening and shove yourself in it. You get stuck. The hole is too small for your whole body, so you attempt to pull yourself out."
+        self.hidden_label = Label(
+            text="",
+            font_size="25sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True,
+            color=self.brown
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.hidden_label)
+        
+        self.type_hidden = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.hidden_text, self.hidden_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.2
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_hidden, 0.5, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_hidden, 1, self.threshold2), pause_time2)
+        schedule_time = len(self.hidden_text) * 0.05 + 1.5
+        Clock.schedule_once(lambda dt: self.game_over(dt, self.boulder), schedule_time)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.boulder_sound.stop(), schedule_time)
+    
+    def two_btns(self, dt):
+        self.stop()
+    
     def option_menu(self, instance):
         self.layout.clear_widgets()
         self.ambience.stop()
@@ -1941,7 +2252,7 @@ class AdventureApp(App):
             elif self.cod == self.bat_eaten:
                 self.bat_death.play()
             elif self.cod == self.crush_death:
-                self.crush_play()
+                self.crush.play()
         if self.ambience_on == True:
             self.ambience.stop() 
         self.died_label.opacity = 0
@@ -2056,14 +2367,17 @@ class AdventureApp(App):
         Clock.schedule_interval(lambda dt: self.image_appear(dt, self.exit_no, 1), 0.2)
         if self.images_on:
             Clock.schedule_interval(lambda dt: self.image_appear(dt, self.vic_image, 1), 0.2)
-        Clock.schedule_once(lambda dt: self.layout.add_widget(self.main_menu_button), 2.5)
+        Clock.schedule_once(lambda dt: self.layout.add_widget(self.main_menu_btn), 2.5)
         
     def resetdeaths(self, instance):
         self.death_count = 0
     
     def end_win(self, instance):
-        self.victorySFX.cancel()
-        self.victorySFX2.cancel()
+        try:
+            self.victorySFX.cancel()
+            self.victorySFX2.cancel()
+        except:
+            pass
         self.vic_ambience.stop()
         self.vic_ambience2.stop()
         
@@ -2077,6 +2391,10 @@ class AdventureApp(App):
         else:
             return False
             
+    def Samplification(self, dt, SFX, target_volume, interval):
+        Clock.schedule_interval(lambda dt: self.amplification(dt, SFX, target_volume), interval)
+        
+    
     def amplification(self, dt, SFX, target_volume):
         if SFX.volume < target_volume:
             SFX.volume += 0.1
