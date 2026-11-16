@@ -2096,6 +2096,7 @@ class AdventureApp(App):
             background_color=[0, 1, 0, 1],
             color=[0, 1, 0, 1]
         )
+        self.submit_btn.bind(on_press=self.submitted)
         self.fork_btn = Button(
             text="fork",
             font_size="20sp",
@@ -2251,6 +2252,58 @@ class AdventureApp(App):
         self.spatula_btn.disabled = False
         self.book_btn.disabled = False
         self.bowl_btn.disabled = False
+    
+    def submitted(self, instance):
+        self.layout.clear_widgets()
+        try:
+            self.rip.cancel()
+        except:
+            pass
+        try:
+            self.extra.cancel()
+        except:
+            pass
+        try:
+            self.dumb.cancel()
+        except:
+            pass
+        self.char_index = 0
+        self.submitted_label = Label(
+            text="",
+            font_size="25sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True,
+            color=self.brown
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.submitted_label)
+        if self.firstinput == self.fork_btn.text and self.egg_btn.disabled and self.bowl_btn.disabled and self.door_btn.disabled:
+            self.submitted_text = f"""You input: {self.firstinput}{self.code}, and press the submit button. The screen responds, "Access granted", and the door opens. A big amount of sunlight rushes in, the happiness and relief you feel at the moment is undexribable. Behind the door is an opening that leads outside."""
+            self.threshold = f"You input: {self.firstinput}{self.code}, and press the submit button."
+            self.threshold2 = f"""You input: {self.firstinput}{self.code}, and press the submit button. The screen responds, "Access granted", and the door opens."""
+            self.type_submitted = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.submitted_text, self.submitted_label), 0.05)
+            pause_time = len(self.threshold) * 0.05 - 0.4
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_submitted, 1, self.threshold), pause_time)
+            pause_time2 = len(self.threshold2) * 0.05 + 0.6
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_submitted, 0.5, self.threshold2), pause_time2)
+            schedule_time = len(self.submitted_text) * 0.05 + 2
+            self.exit_num = "2"
+            Clock.schedule_once(self.victory_scene, schedule_time)
+        elif self.chair_btn.disabled and self.spoon_btn.disabled and self.book_btn.disabled and self.spatula_btn.disabled:
+            self.submitted_text = f"""You input: {self.firstinput}{self.code}, and press the submit button. The screen responds, "Secret code detected. Initiating secret sequence" You are confused as what that means, but before you get a chance to react, everything goes black."""
+            self.threshold = f"You input: {self.firstinput}{self.code}, and press the submit button."
+            self.threshold2 = f"""You input: {self.firstinput}{self.code}, and press the submit button. The screen responds, "Secret code detected. Initiating secret sequence" """
+            
+            self.type_submit = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.submitted_text, self.submitted_label), 0.05)
+            pause_time = len(self.threshold) * 0.05 - 0.4
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_submit, 1, self.threshold), pause_time)
+            pause_time2 = len(self.threshold2) * 0.05 + 0.6
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_submit, 0.5, self.threshold2), pause_time2)
+        
     
     def ran(self, instance):
         self.qte.cancel()
@@ -2564,7 +2617,7 @@ class AdventureApp(App):
         
     def victory_scene(self, instance):
         self.layout.clear_widgets()
-        self.scenery_text = "You walk out the opening. You see the path going downwards. It appears that this *cave* is built on a mountain. You follow the path downwards towards the very beutiful sunshine. You embrace the sunlight as you walk downward, even the birds chirping sounds like music to your ears. So many unanswered questions remain, yet you stopped caring. You're just happy you're alive."
+        self.scenery_text = "You walk out the opening. You see the path going downwards. It appears that this *cave* is built on a mountain. You follow the path downwards towards the very beautiful sunshine. You embrace the sunlight as you walk downward, even the birds chirping sounds like music to your ears. So many unanswered questions remain, yet you stopped caring. You're just happy you're alive."
         self.scenery_label = Label(
             text="",
             font_size="24sp",
@@ -2749,7 +2802,7 @@ class AdventureApp(App):
         self.no_effect.disabled = True
         self.no_effect.background_color = [0, 1, 0, 1]
         self.yes_effect.background_color = [1, 1, 1, 1]
-        
+          
     def quit(self, instance):
         self.stop()
         
