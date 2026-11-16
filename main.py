@@ -321,7 +321,7 @@ class AdventureApp(App):
             pos_hint={'x': 0, 'top': 0.95},
             font_size="9sp"
         )
-        self.test_btn.bind(on_press=self.puzzle_reveal)
+        self.test_btn.bind(on_press=self.bigpuzzle)
         self.layout.add_widget(self.test_btn)
         #)
         
@@ -1916,7 +1916,7 @@ class AdventureApp(App):
     def spidermanned(self, instance):
         self.layout.clear_widgets()
         self.qte.cancel()
-        self.spiderman_text = "You take out your grapple gun and shoot it upwards. You pull yourself upwards, the boulder scrapes your feet as it passes by. The boulder crashes onto the wall, blocking off the path backwards. You drop back down, you see what appears to be a big are behind where the boulder was, it seems that's your only path, so you take it."
+        self.spiderman_text = "You take out your grapple gun and shoot it upwards. You pull yourself upwards, the boulder scrapes your feet as it passes by. The boulder crashes onto the wall, blocking off the path backwards. You drop back down, you see what appears to be a big area behind where the boulder was, it seems that's your only path, so you take it."
         self.threshold = "You take out your grapple gun and shoot it upwards."
         self.threshold2 = "You take out your grapple gun and shoot it upwards. You pull yourself upwards, the boulder scrapes your feet as it passes by."
         self.threshold3 = "You take out your grapple gun and shoot it upwards. You pull yourself upwards, the boulder scrapes your feet as it passes by. The boulder crashes onto the wall, blocking off the path backwards."
@@ -1941,16 +1941,16 @@ class AdventureApp(App):
             Clock.schedule_once(lambda dt: self.grapple.play(), pause_time)
             Clock.schedule_once(lambda dt: self.grapple_back.play(), pause_time + 3.2)
             Clock.schedule_once(lambda dt: self.grapple_back.stop(), pause_time + 5)
-            pause_time2 = len(self.threshold2) * 0.05 + 3.2
+            pause_time2 = len(self.threshold2) * 0.05 + 2.75
             self.impact.volume = 0.05
             Clock.schedule_once(lambda dt: self.boulder_sound.stop(), pause_time2)
             Clock.schedule_once(lambda dt: self.impact.play(), pause_time2)
             Clock.schedule_once(lambda dt: self.bouldercrash.play(), pause_time2)
-            pause_time3 = len(self.threshold3) * 0.05 + 3.7
+            pause_time3 = len(self.threshold3) * 0.05 + 3.15
             schedule_time = len(self.spiderman_text) * 0.05 + 4.2
         else:
-            pause_time2 = len(self.threshold2) * 0.05 - 0.2
-            pause_time3 = len(self.threshold3) * 0.05 + 0.3
+            pause_time2 = len(self.threshold2) * 0.05 - 0.4
+            pause_time3 = len(self.threshold3) * 0.05
             schedule_time = len(self.spiderman_text) * 0.05 + 0.8
         Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_spider, 0.5, self.threshold2), pause_time2)
         Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_spider, 0.5, self.threshold3), pause_time3)
@@ -1958,6 +1958,299 @@ class AdventureApp(App):
     
     def puzzleroom(self, instance):
         self.layout.clear_widgets()
+        self.bigroom_text = """You follow the path up the slope. You reach the end, it's a big empty space with a metal door directly in front of you. Next to the door is a small keypad. On the edge of the metal door, a small paper appears to be stuck. It reads, "Cave Layout De-". It appears that the paper was torn out of something. Your only choice seems to be to figure the code out, you don't even know where the door leads."""
+        self.bigroom_label = Label(
+            text="",
+            color=self.brown,
+            font_size="22sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.bigroom_image = Image(
+            source="assets/puzzleroom.jpg",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+        )
+        if self.images_on:
+            self.layout.add_widget(self.bigroom_image)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.bigroom_label)
+        self.current_skip_func = self.skip_big
+        self.layout.add_widget(self.skip_button)
+        self.skip_button.bind(on_press=self.skip_big)
+        
+        self.type_big = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.bigroom_text, self.bigroom_label), 0.05)
+        schedule_time = len(self.bigroom_text) * 0.05
+        self.start_solving = Clock.schedule_once(lambda dt: self.add_continue(dt, self.bigpuzzle), schedule_time)
+    
+    def skip_big(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_big.cancel()
+            self.start_solving.cancel()
+            Clock.schedule_once(lambda dt: self.add_continue(dt, self.bigpuzzle), 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)  
+    
+    def bigpuzzle(self, instance): #(bent spoon, closed book, small chair, very thin spatula)
+        self.layout.clear_widgets()
+        self.bigpuzzle_text = """You look closer at the keypad. The screen reads, "enter the 4-digit code to continue." You look at the buttons, what you see confuses you. Instead of digits, the buttons have drawings carved into them. A closed door is carved into the first button usually having the number one on it, followed by a round table, a small chair, an un-even fork, a bent spoon, a cracked egg, a very thin spatula, a closed book, and a deep bowl carved into the remaining eight buttons respectively. Next to these buttons are a green button labeled 'SUBMIT', and a red button labeled 'RESET'. You are confused by what you see, yet you don't have a choice but to try solving it."""
+        self.bigpuzzle_label = Label(
+            text = "",
+            font_size="19sp",
+            color=self.brown,
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.bigpuzzle_image = Image(
+            source="assets/Puzzle.jpg",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+        )
+        if self.images_on:
+            self.layout.add_widget(self.bigpuzzle_image)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.bigpuzzle_label)
+        self.current_skip_func = self.skip_solving
+        self.layout.add_widget(self.skip_button)
+        self.skip_button.bind(on_press=self.skip_solving)
+        
+        self.type_bigpuzzle = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.bigpuzzle_text, self.bigpuzzle_label), 0.05)
+        schedule_time = len(self.bigpuzzle_text) * 0.05 - 0.5
+        self.solvenow = Clock.schedule_once(self.solveopts, schedule_time)        
+    
+    def skip_solving(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_bigpuzzle.cancel()
+            self.solvenow.cancel()
+            Clock.schedule_once(self.solveopts, 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+    
+    def solveopts(self, dt):
+        self.code = ""
+        self.firstinput = ""
+        self.pressed_no = 0
+        self.have_reset = False
+        self.wasdumb = True
+        self.door_btn = Button(
+            text="door",
+            font_size="20sp",
+            size_hint=(0.2, 0.1),
+            pos_hint={'x': 0.025, 'top': 0.375},
+            color=[0, 0, 0, 1]
+        )
+        self.door_btn.bind(on_press=self.pressed)
+        self.table_btn = Button(
+            text="table",
+            font_size="20sp",
+            size_hint=(0.2, 0.1),
+            pos_hint={'x': 0.275, 'top': 0.375},
+            color=[0, 0, 0, 1]
+        )
+        self.table_btn.bind(on_press=self.pressed)
+        self.chair_btn = Button(
+            text="chair",
+            font_size="20sp",
+            size_hint=(0.2, 0.1),
+            pos_hint={'x': 0.525, 'top': 0.375},
+            color=[0, 0, 0, 1]
+        )
+        self.chair_btn.bind(on_press=self.pressed)
+        self.submit_btn = Button(
+            text="SUBMIT",
+            font_size="16sp",
+            size_hint=(0.2, 0.15),
+            pos_hint={'right': 0.975, 'top': 0.365},
+            background_color=[0, 1, 0, 1],
+            color=[0, 1, 0, 1]
+        )
+        self.fork_btn = Button(
+            text="fork",
+            font_size="20sp",
+            size_hint=(0.2, 0.1),
+            pos_hint={'x': 0.025, 'top': 0.25},
+            color=[0, 0, 0, 1]
+        )
+        self.fork_btn.bind(on_press=self.pressed)
+        self.spoon_btn = Button(
+            text="spoon",
+            font_size="20sp",
+            size_hint=(0.2, 0.1),
+            pos_hint={'x': 0.275, 'top': 0.25},
+            color=[0, 0, 0, 1]
+        )
+        self.spoon_btn.bind(on_press=self.pressed)
+        self.egg_btn = Button(
+            text="egg",
+            font_size="20sp",
+            size_hint=(0.2, 0.1),
+            pos_hint={'x': 0.525, 'top': 0.25},
+            color=[0, 0, 0, 1]
+        )
+        self.egg_btn.bind(on_press=self.pressed)
+        self.reset_btn = Button(
+            text="RESET",
+            font_size="16sp",
+            size_hint=(0.2, 0.15),
+            pos_hint={'right': 0.975, 'top': 0.185},
+            background_color=[1, 0, 0, 1],
+            color=[1, 0, 0, 1]
+        )
+        self.reset_btn.bind(on_press=self.reset_btns)
+        self.spatula_btn = Button(
+            text="spatula",
+            font_size="20sp",
+            size_hint=(0.2, 0.1),
+            pos_hint={'x': 0.025, 'top': 0.125},
+            color=[0, 0, 0, 1]
+        )
+        self.spatula_btn.bind(on_press=self.pressed)
+        self.book_btn = Button(
+            text="book",
+            font_size="20sp",
+            size_hint=(0.2, 0.1),
+            pos_hint={'x': 0.275, 'top': 0.125},
+            color=[0, 0, 0, 1]
+        )
+        self.book_btn.bind(on_press=self.pressed)
+        self.bowl_btn = Button(
+            text="bowl",
+            font_size="20sp",
+            size_hint=(0.2, 0.1),
+            pos_hint={'x': 0.525, 'top': 0.125},
+            color=[0, 0, 0, 1]
+        )
+        self.bowl_btn.bind(on_press=self.pressed)
+        
+        self.layout.add_widget(self.door_btn)
+        self.layout.add_widget(self.table_btn)
+        self.layout.add_widget(self.chair_btn)
+        self.layout.add_widget(self.submit_btn)
+        self.layout.add_widget(self.fork_btn)
+        self.layout.add_widget(self.spoon_btn)
+        self.layout.add_widget(self.egg_btn)
+        self.layout.add_widget(self.reset_btn)
+        self.layout.add_widget(self.spatula_btn)
+        self.layout.add_widget(self.book_btn)
+        self.layout.add_widget(self.bowl_btn)
+            
+    def pressed(self, instance):
+        if self.pressed_no < 4:
+            instance.disabled = True
+            self.pressed_no += 1
+            if self.firstinput == "":
+                self.firstinput = instance.text
+                self.extra_text = f"You press the {instance.text} button. An asterisk appears on the screen. It seems the keypad does actually work."
+                if not self.have_reset:
+                    self.bigpuzzle_label.text = ""
+                    self.extra = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.extra_text, self.bigpuzzle_label), 0.05)
+            else:
+                self.code += f", {instance.text}"
+        elif self.wasdumb:
+            self.dumb_text = "You press a fifth button. Nothing happens. When the screen said 4-digit code, it meant it. You feel like an idiot now."
+            self.bigpuzzle_label.text = ""
+            self.char_index = 0
+            try:
+                self.extra.cancel()
+            except:
+                pass
+            try:
+                self.rip.cancel()
+            except:
+                pass
+            self.dumb = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.dumb_text, self.bigpuzzle_label), 0.05)
+            self.wasdumb = False
+        else:
+            try:
+                self.dumb.cancel()
+            except:
+                pass
+            try:
+                self.extra.cancel()
+            except:
+                pass
+            try:
+                self.rip.cancel()
+            except:
+                pass
+            self.char_index = 0
+            self.bigpuzzle_label.text="The buttons are: A closed book, a round table, a small chair, an un-even fork, a bent spoon, a cracked egg, a very thin spatula, a closed book, and a deep bowl." 
+                
+    
+    def reset_btns(self, instance):
+        self.reset_text="You press the reset button. All asterisks are erased. It seems this keypad functions properly."
+        if not self.have_reset:
+            self.char_index = 0
+            self.bigpuzzle_label.text=""
+            try:
+                self.extra.cancel()
+            except:
+                pass
+            try:
+                self.dumb.cancel()
+            except:
+                pass
+            self.rip = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.reset_text, self.bigpuzzle_label), 0.05)
+            self.have_reset = True
+        else:
+            self.char_index = 0
+            try:
+                self.rip.cancel()
+            except:
+                pass
+            try:
+                self.extra.cancel()
+            except:
+                pass
+            try:
+                self.dumb.cancel()
+            except:
+                pass
+            self.bigpuzzle_label.text="The buttons are: A closed book, a round table, a small chair, an un-even fork, a bent spoon, a cracked egg, a very thin spatula, a closed book, and a deep bowl."
+        self.code = ""
+        self.firstinput = ""
+        self.pressed_no = 0
+        self.door_btn.disabled = False
+        self.table_btn.disabled = False
+        self.chair_btn.disabled = False
+        self.fork_btn.disabled = False
+        self.spoon_btn.disabled = False
+        self.egg_btn.disabled = False
+        self.spatula_btn.disabled = False
+        self.book_btn.disabled = False
+        self.bowl_btn.disabled = False
     
     def ran(self, instance):
         self.qte.cancel()
