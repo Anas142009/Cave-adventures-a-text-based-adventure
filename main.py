@@ -131,6 +131,7 @@ class AdventureApp(App):
         self.fall_death = "fell to doom"
         self.crush_death = "crushed to death"
         self.death_count = 0
+        self.spilled = False
         #)
         
         self.continue_button = Button(
@@ -287,7 +288,7 @@ class AdventureApp(App):
             background_color=[0, 0, 0, 0],
             color=[1, 1, 1, 1]
         )
-        
+        self.secret_btn.bind(on_press=self.revealed)
         self.secret_stroke = Button(
             text="secret code",
             font_size="11sp",
@@ -306,7 +307,7 @@ class AdventureApp(App):
         
         if self.images_on == True:
             self.layout.add_widget(self.UI_image)
-        if self.death_count >= 10:
+        if self.death_count >= 10 and not self.spilled:
             self.layout.add_widget(self.secret_stroke)
             self.layout.add_widget(self.secret_btn) 
         self.layout.add_widget(self.title_background)
@@ -321,7 +322,7 @@ class AdventureApp(App):
             pos_hint={'x': 0, 'top': 0.95},
             font_size="9sp"
         )
-        self.test_btn.bind(on_press=self.bigpuzzle)
+        self.test_btn.bind(on_press=self.stuck)
         self.layout.add_widget(self.test_btn)
         #)
         
@@ -329,6 +330,30 @@ class AdventureApp(App):
         if self.ambience_on == True:
             self.ambience.play()
 
+    def revealed(self, instance):
+        self.layout.clear_widgets()
+        self.secret_code = Label(
+            text="The secret code is: book, chair, spatula, and spoon. Input it wherever you can for a secret.",
+            font_size="27sp",
+            size_hint=(1, 1),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.back_btn = Button(
+            text="Back",
+            font_size="24sp",
+            size_hint=(0.3, 0.2),
+            pos_hint={'center_x': 0.5, 'y': 0.05}
+        )
+        self.back_btn.bind(on_press=self.main_menu)
+        
+        self.layout.add_widget(self.secret_code)
+        self.layout.add_widget(self.back_btn)
+        self.spilled = True
+    
     def start_game(self, instance):
         self.layout.clear_widgets()
         
@@ -1803,9 +1828,6 @@ class AdventureApp(App):
             self.layout.remove_widget(self.skip_button)    
     
     def lefty(self, dt):
-        #REMOVE    AFTER    TESTING:(
-        self.havegrapple = True
-        #)
         self.Bpath = Button(
             text="Go left",
             font_size="24sp",
@@ -2288,22 +2310,197 @@ class AdventureApp(App):
             self.type_submitted = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.submitted_text, self.submitted_label), 0.05)
             pause_time = len(self.threshold) * 0.05 - 0.4
             Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_submitted, 1, self.threshold), pause_time)
-            pause_time2 = len(self.threshold2) * 0.05 + 0.6
+            pause_time2 = len(self.threshold2) * 0.05 + 0.45
             Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_submitted, 0.5, self.threshold2), pause_time2)
             schedule_time = len(self.submitted_text) * 0.05 + 2
             self.exit_num = "2"
             Clock.schedule_once(self.victory_scene, schedule_time)
         elif self.chair_btn.disabled and self.spoon_btn.disabled and self.book_btn.disabled and self.spatula_btn.disabled:
-            self.submitted_text = f"""You input: {self.firstinput}{self.code}, and press the submit button. The screen responds, "Secret code detected. Initiating secret sequence" You are confused as what that means, but before you get a chance to react, everything goes black."""
+            self.submitted_text = f"""You input: {self.firstinput}{self.code}, and press the submit button. The screen responds, "Secret code detected. Initiating secret sequence". You are confused as what that means, but before you get a chance to react, everything goes black."""
             self.threshold = f"You input: {self.firstinput}{self.code}, and press the submit button."
-            self.threshold2 = f"""You input: {self.firstinput}{self.code}, and press the submit button. The screen responds, "Secret code detected. Initiating secret sequence" """
+            self.threshold2 = f"""You input: {self.firstinput}{self.code}, and press the submit button. The screen responds, "Secret code detected. Initiating secret sequence". """
             
             self.type_submit = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.submitted_text, self.submitted_label), 0.05)
             pause_time = len(self.threshold) * 0.05 - 0.4
             Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_submit, 1, self.threshold), pause_time)
-            pause_time2 = len(self.threshold2) * 0.05 + 0.6
+            pause_time2 = len(self.threshold2) * 0.05 + 0.35
             Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_submit, 0.5, self.threshold2), pause_time2)
+            schedule_time = len(self.submitted_text) * 0.05 + 1.2
+            Clock.schedule_once(self.secrecy, schedule_time)
+        else:
+            self.submitted_text = f"""You input: {self.firstinput}{self.code}, and press the submit button. The screen responds, "Error. Self destruction initiated", then immediately, the whole cave is shaking. You see debris and dust falling from the roof, the ground below you also starts cracking. You start running back. You reach the opening that is now blocked off with the boulder, it seems impossible to keep going that way. The ground below you crumbles."""
+            self.threshold = f"""You input: {self.firstinput}{self.code}, and press the submit button."""
+            self.threshold2 = f"""You input: {self.firstinput}{self.code}, and press the submit button. The screen responds, "Error. Self destruction initiated", then immediately, """
+            self.threshold3 = f"""You input: {self.firstinput}{self.code}, and press the submit button. The screen responds, "Error. Self destruction initiated", then immediately, the whole cave is shaking. You see debris and dust falling from the roof, the ground below you also starts cracking."""
+            self.threshold4 = f"""You input: {self.firstinput}{self.code}, and press the submit button. The screen responds, "Error. Self destruction initiated", then immediately, the whole cave is shaking. You see debris and dust falling from the roof, the ground below you also starts cracking. You start running back. You reach the opening that is now blocked off with the boulder, it seems impossible to keep going that way."""
+            self.submitted_label.font_size = "24sp"
+            self.type_submitted = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.submitted_text, self.submitted_label), 0.05)
+            pause_time = len(self.threshold) * 0.05 - 0.4
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_submitted, 1, self.threshold), pause_time)
+            pause_time2 = len(self.threshold2) * 0.05 + 0.25
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_submitted, 0.5, self.threshold2), pause_time2)
+            if self.effects_on:
+                self.boulder_sound.volume = 0.3
+                Clock.schedule_once(lambda dt: self.boulder_sound.play(), pause_time2)
+            pause_time3 = len(self.threshold3) * 0.05 + 0.5
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_submitted, 1, self.threshold3), pause_time3)
+            if self.effects_on:
+                if self.ambience_on:
+                    self.ambience.volume = 0.2
+                self.crack.volume = 0.7
+                Clock.schedule_once(lambda dt: self.crack.play(), pause_time3)
+            pause_time4 = len(self.threshold4) * 0.05 + 1.1
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_submitted, 1, self.threshold4), pause_time4)
+            if self.effects_on:
+                Clock.schedule_once(self.crumble, pause_time4)
+            schedule_time = len(self.submitted_text) * 0.05 + 3
+            Clock.schedule_once(lambda dt: self.game_over(dt, self.bigpuzzle), schedule_time)
+            self.cod = "fell to doom"
+            if self.effects_on:
+                Clock.schedule_once(lambda dt: self.boulder_sound.stop(), schedule_time)          
         
+    def secrecy(self, dt):
+        self.layout.clear_widgets()
+        Clock.schedule_once(self.archive, 10)
+    
+    def archive(self, dt):
+        self.layout.clear_widgets()
+        self.archive_text = "Welcome to the lore archive. Here, you can read the whole story behind Cave Adventures. Most of the story can be understood via gameplay, so if you want to try figuring it out yourself, you can click 'return to main menu' to go back to the main menu; or click 'return to puzzle' to go back to the puzzle room you were just in. If you want to read the whole story, click 'access the archive'. The archive is a multi-page story that you can read at your own pace."
+        self.archive_label = Label(
+            text=self.archive_text,
+            font_size="22sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=[0.5, 0.5, 0.5, 1],
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.main_menu_button = Button(
+            text="return to main menu",
+            font_size="22sp",
+            size_hint=(0.6, 0.1),
+            pos_hint={'center_x': 0.5, 'y': 0},
+            background_color=self.brown
+        )
+        self.main_menu_button.bind(on_press=self.main_menu)
+        self.repuzzle = Button(
+            text="return to puzzle",
+            font_size="22sp",
+            size_hint=(0.6, 0.1),
+            pos_hint={'center_x': 0.5, 'y': 0.1},
+            background_color=self.brown
+        )
+        self.repuzzle.bind(on_press=self.bigpuzzle)
+        if self.ambience_on:
+            self.ambience.stop()
+            self.repuzzle.bind(on_press=lambda instance: self.ambience.play())
+        self.read_btn = Button(
+            text="access the archive",
+            font_size="26sp",
+            size_hint=(0.8, 0.2),
+            pos_hint={'center_x': 0.5, 'y': 0.2},
+            background_color=self.brown
+        )
+        self.read_btn.bind(on_press=self.story)
+        
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.archive_label)
+        self.layout.add_widget(self.main_menu_button)
+        self.layout.add_widget(self.repuzzle)
+        self.layout.add_widget(self.read_btn)
+    
+    def story(self, instance):
+        self.layout.clear_widgets()
+        self.story_label = Label(
+            text="DISCLAIMER\n\nThis game's story, names, and locations are entirely fictional. Any similarity to real-life objects or people is entirely coincidential..",
+            font_size="27sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.page_no = 0
+        self.next_btn = Button(
+            text="next page -->",
+            size_hint=(0.2, 0.4),
+            pos_hint={'right': 1, 'top': 0.4},
+            font_size="19sp",
+            text_size=(Window.width * 0.2, Window.height * 0.4),
+            valign='center',
+            halign='center'
+        )
+        self.next_btn.bind(on_press=self.next_page)
+        self.prev_btn = Button(
+            text="prev. page <--",
+            font_size="18sp",
+            size_hint=(0.2, 0.4),
+            pos_hint={'x': 0, 'top': 0.4},
+            text_size=(Window.width * 0.2, Window.height * 0.4),
+            valign='center',
+            halign='center'
+        )
+        if self.page_no == 0:
+            self.prev_btn.text = "Back"
+            self.prev_btn.bind(on_press=self.Rarchive)
+        else:
+            self.prev_btn.bind(on_press=self.prev_page)
+        
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.story_label)
+        self.layout.add_widget(self.next_btn)
+        self.layout.add_widget(self.prev_btn)
+           
+    def Rarchive(self, instance):
+        Clock.schedule_once(self.archive, 0)
+    
+    def next_page(self, instance):
+        self.page_no += 1
+        if self.page_no > 1:
+            try:
+                self.prev_btn.unbind(on_press=self.Rarchive)
+            except:
+                pass
+            self.prev_btn.bind(on_press=self.prev_page)
+            self.prev_btn.text = "prev. page <--"
+        Clock.schedule_once(self.loadstory, 0)
+        
+    
+    def prev_page(self, instance):
+        self.page_no -= 1
+        if self.page_no == 1:
+            self.prev_btn.unbind(on_press=self.prev_page)
+            self.prev_btn.bind(on_press=self.Rarchive)   
+            self.prev_btn.text = "Back"
+        Clock.schedule_once(self.loadstory, 0)
+    
+    def loadstory(self, dt):
+        if self.page_no == 0:
+            self.story_label.text = "DISCLAIMER\n\nThis game's story, names, and locations are entirely fictional. Any similarity to real-life objects or people is entirely coincidential."
+            self.story_label.font_size = "27sp"
+        elif self.page_no == 1:
+            self.story_label.text = "You are an ordinary office worker, with extraordinary friends. Your friends include a scientist, his assistants, and a person who works with the governement. One day, you had a meeting with your friends, and talked about interesting stuff. The scientist mentioned a project they're working on that tests people's reactions in a life-or-death simulation, but they know that they are in a simulation. You protest against the idea, as you think it's wrong to put poeple's lives in danger, even if it is just a simulation."
+            self.story_label.font_size="20sp"
+        elif self.page_no == 2:
+            self.story_label.text = "What you didn't know is that this scientist friend of yours and his assistants are all a part of a much larger organization known as the HRRO. The HRRO is an organization that conducts research in human reactions in different situations with different stimuli. However, the HRRO has a dark secret. As an organization that tests human reactions, they are legally limited to simulation, or low danger levels with willing volunteers, but for a full in-depth research, it was necessary to test the reactions of non-willing people, and thus, the HRIT project was initiated."
+            self.story_label.font_size="19sp"
+        elif self.page_no == 3:
+            self.story_label.text = "The HRIT project, is an illegal project where humans are put through REAL life-or-death situations without their consent. The *cave* you were put in is one of the many sites of the HRIT project. The HRIT project's targets are usually not random. After your protest against the simulation idea, the HRRO was scared of you doing research into them since you have a friend working in the government. The HRRO put you through this test for two major reasons. The first, is to simply remove a threat. In other words, to kill you. The second reason is, even if you do survive, they had needed a test subject for this site anyway."
+            try:
+                self.next_btn.unbind(on_press=self.Rarchive)
+            except:
+                pass
+            self.next_btn.text = "next page -->"
+            self.next_btn.bind(on_press=self.next_page)
+        elif self.page_no == 4:
+            self.story_label.text = "As a test subject within the HRIT project, they give you drugs that cause memory loss, which is why you barely remember anything when you first wake up. The other thing they do to you is plant chips inside of you for tracking. These chips act as vitals trackers tracking your Bp, heart rate, and other vitals. They also act as location trackers, allowing them to continuously know where you are and what you're doing. The HRIT started many years ago, when the head of the HRRO realized their research was too limited and needed to expand. Each HRIT testing site's records and findings are recorded and stored in a database hidden within the many databases in the HRRO's base of operations." 
+            self.next_btn.text = "done reading"
+            self.next_btn.unbind(on_press=self.next_page)
+            self.next_btn.bind(on_press=self.Rarchive)
     
     def ran(self, instance):
         self.qte.cancel()
@@ -2374,8 +2571,244 @@ class AdventureApp(App):
         if self.effects_on:
             Clock.schedule_once(lambda dt: self.boulder_sound.stop(), schedule_time)
     
-    def two_btns(self, dt):
-        self.stop()
+    def two_btns(self, instance):
+        self.layout.clear_widgets()
+        self.two_text = "You follow the right path. You reach the light source, two small holes in the ceiling similar to the ones at the first fork. These holes are lighting a big empty square area. In the center of the eastern and western walls are two small holes, each of which has a button in it. Neither button has a label on it, and both of them look exactly the same. Which button do you press?"
+        self.threshold="You follow the right path."
+        self.two_label = Label(
+            text="",
+            font_size="23sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.two_label)
+        self.current_skip_func = self.skip_two
+        self.skip_button.bind(on_press=self.skip_two)
+        self.layout.add_widget(self.skip_button)
+        
+        self.type_two = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.two_text, self.two_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.1
+        self.pause_two = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_two, 0.5, self.threshold), pause_time)
+        schedule_time = len(self.two_text) * 0.05 + 0.5
+        self.pick_one = Clock.schedule_once(self.twopiece, schedule_time)
+        
+    def twopiece(self, dt):
+        self.western = Button(
+            text="Western",
+            font_size="24sp",
+            size_hint=(0.4, 0.4),
+            pos_hint={'x': 0, 'center_y': 0.2},
+            background_color=self.brown
+        )
+        self.western.bind(on_press=self.trap)
+        self.eastern = Button(
+            text="Eastern",
+            font_size="24sp",
+            size_hint=(0.4, 0.4),
+            pos_hint={'right': 1, 'center_y': 0.2},
+            background_color=self.brown
+        )
+        self.eastern.bind(on_press=self.longer)
+        self.layout.add_widget(self.western)
+        self.layout.add_widget(self.eastern)    
+    
+    def skip_two(self, dt):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_two.cancel()
+            self.pause_two.cancel()
+            self.pick_one.cancel()
+            Clock.schedule_once(self.twopiece, 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        
+    
+    def longer(self, instance):
+        self.layout.clear_widgets()
+    
+    def trap(self, instance):
+        self.layout.clear_widgets()
+        self.trap_text = "You press the western button. Before you get a chance to react, the ground below you shatters, and you fall into what seems to be a bottomless pit."
+        self.threshold = "You press the western button."
+        self.threshold2 = "You press the western button. Before you get a chance to react, the ground below you shatters,"
+        self.trap_label = Label(
+            text="",
+            font_size="28sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True,
+            color=self.brown
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.trap_label)
+        
+        self.type_trap = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.trap_text, self.trap_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.1
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_trap, 2, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 + 1.6
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_trap, 0.5, self.threshold2), pause_time2)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.death_sound.play(), pause_time2)
+        schedule_time = len(self.trap_text) * 0.05 + 4
+        Clock.schedule_once(self.stuck, schedule_time)
+    
+    def stuck(self, dt):
+        self.layout.clear_widgets()
+        if self.ambience_on:
+            self.ambience.stop()
+        Clock.schedule_once(self.awaken, 5)
+    
+    def awaken(self, dt):
+        self.awaken_text = """You wake up. It's pitch black. You survived the fall, you don't know how. The ground below you. It's soft. A mattress, thick enough to cushion your fall. You stand up, extend your hand upwards. Nothing. Your hand fails to feel anything, no ceiling, no rocks, no wind, just darkness. You walk around on the mattress, you feel the pieces of the ground you once stood on - tiny rocks, scattered in a million pieces, too tiny to even hurt your feet."""
+        self.threshold = "You wake up. It's pitch black. You survived the fall, you don't know how."
+        self.threshold2 = "You wake up. It's pitch black. You survived the fall, you don't know how. The ground below you. It's soft."
+        self.threshold3 = "You wake up. It's pitch black. You survived the fall, you don't know how. The ground below you. It's soft. A mattress, thick enough to cushion your fall. You stand up, extend your hand upwards."
+        self.threshold4 = "You wake up. It's pitch black. You survived the fall, you don't know how. The ground below you. It's soft. A mattress, thick enough to cushion your fall. You stand up, extend your hand upwards. Nothing. Your hand fails to feel anything, no ceiling, no rocks, no wind, just darkness."
+        self.awaken_label = Label(
+            text="",
+            font_size="20sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=self.brown,
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.awaken_label)
+        
+        self.type_awaken = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.awaken_text, self.awaken_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.35
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken, 0.5, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 + 0.1
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken, 0.5, self.threshold2), pause_time2)
+        pause_time3 = len(self.threshold3) * 0.05 + 0.25
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken, 0.5, self.threshold3), pause_time3)
+        pause_time4 = len(self.threshold4) * 0.05 + 0.45
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken, 0.5, self.threshold4), pause_time4)
+        schedule_time = len(self.awaken_text) * 0.05 + 1.1
+        Clock.schedule_once(lambda dt: self.add_continue(dt, self.awaken2), schedule_time)
+    
+    def awaken2(self, instance):
+        self.awaken_label.text = ""
+        self.awaken_label.font_size="18sp"
+        self.layout.remove_widget(instance)
+        self.awaken_text = """A few steps forward, you bump into a wall. A wall, too smooth to even be a part of a cave. Suddenly, all previous encounters in this cave flash through your brain. The layout, the spot you woke up in, your memory loss of how you got here, and even the conveniently and almost too neatly placed lighting holes in the roof. "Was this a set-up?" You think to yourself, "Was I trapped here by someone?" \n"Who? Why? When? For what? I never did anything to anyone to deserve this!" So many unanswered questions echo through your hollow skull. "I don't have time to think about that!" You shout, desperately. "I have to find a way out." """
+        self.threshold = "A few steps forward, you bump into a wall."
+        self.threshold2 = """A few steps forward, you bump into a wall. A wall, too smooth to even be a part of a cave. Suddenly, all previous encounters in this cave flash through your brain."""
+        self.threshold3 = """A few steps forward, you bump into a wall. A wall, too smooth to even be a part of a cave. Suddenly, all previous encounters in this cave flash through your brain. The layout, the spot you woke up in, your memory loss of how you got here, and even the conveniently and almost too neatly placed lighting holes in the roof. "Was this a set-up?" You think to yourself, "Was I trapped here by someone?" """
+        self.threshold4 = """A few steps forward, you bump into a wall. A wall, too smooth to even be a part of a cave. Suddenly, all previous encounters in this cave flash through your brain. The layout, the spot you woke up in, your memory loss of how you got here, and even the conveniently and almost too neatly placed lighting holes in the roof. "Was this a set-up?" You think to yourself, "Was I trapped here by someone?" \n"Who? Why? When? For what? I never did anything to anyone to deserve this!" So many unanswered questions echo through your hollow skull."""
+        
+        self.type_awaken2 = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.awaken_text, self.awaken_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.15
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken2, 0.5, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 + 0.05
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken2, 0.7, self.threshold2), pause_time2)
+        pause_time3 = len(self.threshold3) * 0.05 + 0.1
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken2, 1, self.threshold3), pause_time3)
+        pause_time4 = len(self.threshold4) * 0.05 + 0.7
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken2, 2, self.threshold4), pause_time4)
+        schedule_time = len(self.awaken_text) * 0.05 + 2.7
+        if self.havegrapple:
+            Clock.schedule_once(lambda dt: self.add_continue(dt, self.awaken25), schedule_time)
+        else:
+            Clock.schedule_once(lambda dt: self.add_continue(dt, self.awaken3), schedule_time)
+        
+        
+    def awaken25(self, instance):
+        self.awaken_label.text = ""
+        self.awaken_label.font_size = "24sp"
+        self.layout.remove_widget(instance)
+        self.awaken_text = """You look around for your grapple gun. You lean down towards the ground and start feeling it. After scavenging in the dark for a while, you manage to finally find it. You pick it up, aim upwards, and shoot. It hits nothing, you can feel the rope coming back down. It seems the ceiling is too high up for you to grapple."""
+        self.threshold = "You look around for your grapple gun. You lean down towards the ground and start feeling it."
+        self.threshold2 = "You look around for your grapple gun. You lean down towards the ground and start feeling it. After scavenging in the dark for a while, you manage to finally find it. You pick it up, aim upwards, and shoot."
+        self.type_awaken25 = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.awaken_text, self.awaken_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.4
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken25, 2.5, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 + 1.8
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken25, 3, self.threshold2), pause_time2)
+            Clock.schedule_once(lambda dt: self.grapple.play(), pause_time2)
+            Clock.schedule_once(lambda dt: self.grapple.stop(), pause_time2 + 2.2)
+            schedule_time = len(self.awaken_text) * 0.05 + 5
+        else:
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken25, 1, self.threshold2), pause_time2)
+            schedule_time = len(self.awaken_text) * 0.05 + 3
+        Clock.schedule_once(lambda dt: self.add_continue(dt, self.awaken3), schedule_time)
+    
+    def awaken3(self, instance):
+        self.awaken_label.text = ""
+        self.layout.remove_widget(instance)
+        self.awaken_label.font_size = "19sp"
+        self.awaken_text = """You closely follow and touch the wall, hoping to find an opening, or a rougher surface that could be climbable. Nothing. You halt your examination of the wall when you realize that you've already went in a circle. "NO... This just.... Can't.... Be true... I can't die in a place like this!" But hope isn't all lost. You quickly lie down on the mattress, "If this was indeed a set-up, an exit could be below this thing." You hoped, "Come on, come on!" You start tearing apart the cloth on the mattress, you can feel the cotton stuffed inside it, you start removing it. "Just a little more," you encourage yourself, "I can do this!" """
+        self.threshold = "You closely follow and touch the wall, hoping to find an opening, or a rougher surface that could be climbable."
+        self.threshold2 = """You closely follow and touch the wall, hoping to find an opening, or a rougher surface that could be climbable. Nothing. You halt your examination of the wall when you realize that you've already went in a circle. "NO... This just.... Can't.... Be true... I can't die in a place like this!" But hope isn't all lost."""
+        self.type_awaken3 = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.awaken_text, self.awaken_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.35
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken3, 1.5, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 + 0.6
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken3, 1, self.threshold2), pause_time2)
+        schedule_time = len(self.awaken_text) * 0.05 + 2
+        Clock.schedule_once(lambda dt: self.add_continue(dt, self.awaken4), schedule_time)
+        
+    
+    def awaken4(self, instance):
+        self.layout.remove_widget(instance)
+        self.awaken_label.text = ""
+        self.awaken_label.font_size = "20sp"
+        self.awaken_text = """Moments later, you touch the ground. A touch, that shrouds you completely in despair. "NO, NO! There has to be an exit" you desperately try to convince yourself. "I just have to check other areas."  Moments later, you're too exhausted. you've removed most - if not all - of the mattress's cotton, and yet you've found nothing, like a child who's piñata was empty after working so hard to break it. You are filled with despair."""
+        self.threshold = """Moments later, you touch the ground. A touch, that shrouds you completely in despair. "NO, NO! There has to be an exit" you desperately try to convince yourself. "I just have to check other areas." """
+        
+        self.type_awaken4 = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.awaken_text, self.awaken_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.3 - len("Moments") * 0.05
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken4, 2, self.threshold), pause_time)
+        schedule_time = len(self.awaken_text) * 0.05 + 2
+        Clock.schedule_once(lambda dt: self.add_continue(dt, self.awaken5), schedule_time)
+    
+    def awaken5(self, instance):
+        self.layout.remove_widget(instance)
+        self.awaken_label.text = ""
+        self.awaken_text = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" "death" "exit" "somebody" "help" A surge of endless thoughts drowns your brain.... Until suddenly, your brain goes blank."""
+        self.tick1 = """ "NO!" """
+        self.tick2 = """ "NO!" "I can't die here!" """
+        self.tick3 = """ "NO!" "I can't die here!" "I must find a way out" """
+        self.tick4 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" """
+        self.tick5 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" """
+        self.tick6 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" """
+        self.tick7 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" """
+        self.tick8 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" "I'm gonna die here" """
+        self.tick9 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" "I'm gonna die here" "I don't want to die" """
+        self.tick10 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" """
+        self.tick11 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" """
+        self.tick12 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" """
+        self.tick13 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" """
+        self.tick14 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" """
+        self.tick15 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" """
+        self.tick16 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" "death" """
+        self.tick17 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" "death" "exit" """
+        self.tick18 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" "death" "exit" "somebody" """
+        self.tick19 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" "death" "exit" "somebody" "help" """
+        self.counter = 1
+        self.tickthresh = 20
+        Clock.schedule_interval(lambda dt: self.ticking(dt, self.awaken_label, self.awaken_text), 1)
     
     def option_menu(self, instance):
         self.layout.clear_widgets()
@@ -2482,6 +2915,16 @@ class AdventureApp(App):
         self.char_index = len(pause_quota)
         typewrite_function.cancel()
         self.resumption = Clock.schedule_once(typewrite_function, duration)
+    
+    def ticking(self, dt, label, full_text):
+        if self.counter < self.tickthresh:
+            label.text = getattr(self, f"tick{self.counter}")
+            self.counter += 1
+        else:
+            self.char_index = len(label.text)
+            Clock.schedule_interval(lambda dt: self.typewrite(dt, full_text, label), 0.05)
+            return False
+                
     def typewrite(self, dt, target_text, label):
         self.typed_label = label
         self.targeted = target_text
