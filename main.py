@@ -1,10 +1,12 @@
 __version__ = "0.1.0"
 import os
 import platform
+from kivy.config import Config
 
 os.environ['KIVY_CLOCK'] = 'interrupt'
 # Force Windows environments to use ANGLE/DirectX to prevent OpenGL 1.1 crashes
 if platform.system() == 'Windows':
+    Config.set('graphics', 'fullscreen', 'auto')
     os.environ['KIVY_GL_BACKEND'] = 'angle_sdl2'
     
     
@@ -17,6 +19,8 @@ from kivy.core.audio import SoundLoader
 from kivy.uix.floatlayout import FloatLayout
 from kivy.core.window import Window
 from kivy.utils import get_color_from_hex
+from kivy.storage.jsonstore import JsonStore
+from pathlib import Path
 
 class AdventureApp(App):
     def build(self):
@@ -120,6 +124,8 @@ class AdventureApp(App):
             self.click.volume = 1
             self.click.loop = False
             
+        self.headbutt = SoundLoader.load("assets/headbutt.mp3")
+            
         self.layout = FloatLayout()
         
         #(set all default values here:-
@@ -130,8 +136,9 @@ class AdventureApp(App):
         self.bat_eaten = "eaten by bats"
         self.fall_death = "fell to doom"
         self.crush_death = "crushed to death"
-        self.death_count = 0
         self.spilled = False
+        save_path = Path(self.user_data_dir) / "save.json"
+        self.store = JsonStore(str(save_path))
         #)
         
         self.continue_button = Button(
@@ -221,13 +228,28 @@ class AdventureApp(App):
         
     def main_menu(self, instance):
         self.layout.clear_widgets()
-        
+        #default values:
         self.havegrapple = False
         self.started = False
         self.right_grnd_brkn = False
         self.batted = False
         self.quick_timer = 5
+        if self.headbutt:
+            self.headbutt.volume = 1
+            self.headbutt.loop = False
         self.skip_button.pos_hint = {'right': 1, 'center_y': 0.425}
+        if self.store.exists("exits"):
+            self.exits = self.store.get("exits")
+            self.found_exits = self.exits["found"]
+        else:
+            self.found_exits = []
+            self.store.put("exits", found=self.found_exits)
+        if self.store.exists("deaths"):
+            self.deaths = self.store.get("deaths")
+            self.death_count = self.deaths["count"]
+        else:
+            self.death_count = 0
+            self.store.put("deaths", count=self.death_count)
         
         self.gamename = Label(
             text="CAVE\nADVENTURES",
@@ -307,7 +329,7 @@ class AdventureApp(App):
         
         if self.images_on == True:
             self.layout.add_widget(self.UI_image)
-        if self.death_count >= 10 and not self.spilled:
+        if (self.death_count >= 10 or ("1" in self.found_exits and "2" in self.found_exits and "3" in self.found_exits)) and not self.spilled:
             self.layout.add_widget(self.secret_stroke)
             self.layout.add_widget(self.secret_btn) 
         self.layout.add_widget(self.title_background)
@@ -2304,7 +2326,7 @@ class AdventureApp(App):
         self.layout.add_widget(self.text_background)
         self.layout.add_widget(self.submitted_label)
         if self.firstinput == self.fork_btn.text and self.egg_btn.disabled and self.bowl_btn.disabled and self.door_btn.disabled:
-            self.submitted_text = f"""You input: {self.firstinput}{self.code}, and press the submit button. The screen responds, "Access granted", and the door opens. A big amount of sunlight rushes in, the happiness and relief you feel at the moment is undexribable. Behind the door is an opening that leads outside."""
+            self.submitted_text = f"""You input: {self.firstinput}{self.code}, and press the submit button. The screen responds, "Access granted", and the door opens. A big amount of sunlight rushes in, the happiness and relief you feel at the moment is undescribable. Behind the door is an opening that leads outside."""
             self.threshold = f"You input: {self.firstinput}{self.code}, and press the submit button."
             self.threshold2 = f"""You input: {self.firstinput}{self.code}, and press the submit button. The screen responds, "Access granted", and the door opens."""
             self.type_submitted = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.submitted_text, self.submitted_label), 0.05)
@@ -2786,7 +2808,7 @@ class AdventureApp(App):
     def awaken5(self, instance):
         self.layout.remove_widget(instance)
         self.awaken_label.text = ""
-        self.awaken_text = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" "death" "exit" "somebody" "help" A surge of endless thoughts drowns your brain.... Until suddenly, your brain goes blank."""
+        self.awaken_text = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" "death" "exit" "somebody" "help" A surge of endless thoughts drowns your brain.... Until suddenly, your brain goes blank."""
         self.tick1 = """ "NO!" """
         self.tick2 = """ "NO!" "I can't die here!" """
         self.tick3 = """ "NO!" "I can't die here!" "I must find a way out" """
@@ -2796,19 +2818,72 @@ class AdventureApp(App):
         self.tick7 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" """
         self.tick8 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" "I'm gonna die here" """
         self.tick9 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" "I'm gonna die here" "I don't want to die" """
-        self.tick10 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" """
-        self.tick11 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" """
-        self.tick12 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" """
-        self.tick13 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" """
-        self.tick14 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" """
-        self.tick15 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" """
-        self.tick16 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" "death" """
-        self.tick17 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" "death" "exit" """
-        self.tick18 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" "death" "exit" "somebody" """
-        self.tick19 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit." "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" "death" "exit" "somebody" "help" """
+        self.tick10 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" "I'm gonna die here" "I don't want to die" "Somebody help!" """
+        self.tick11 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" """
+        self.tick12 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" """
+        self.tick13 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" """
+        self.tick14 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" """
+        self.tick15 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" """
+        self.tick16 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" "death" """
+        self.tick17 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" "death" "exit" """
+        self.tick18 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" "death" "exit" "somebody" """
+        self.tick19 = """ "NO!" "I can't die here!" "I must find a way out" "There just has to be a way out" "Is there a way out?" "I've looked everywhere, haven't I?" "There is just no exit" "I'm gonna die here" "I don't want to die" "Somebody help!" "I don't want to die" "I'm gonna die" "Help" "Exit" "somebody" "death" "exit" "somebody" "help" """
         self.counter = 1
+        self.remaining_text = (len(self.awaken_text) - len(self.tick19)) * 0.05
         self.tickthresh = 20
         Clock.schedule_interval(lambda dt: self.ticking(dt, self.awaken_label, self.awaken_text), 1)
+        schedule_time = self.remaining_text + self.tickthresh
+        Clock.schedule_once(lambda dt: self.add_continue(dt, self.awaken6), schedule_time)             
+    
+    def awaken6(self, instance):
+        self.layout.remove_widget(instance)
+        self.awaken_label.text = ""
+        self.awaken_text = """Your head feels hollow, like an egg missing its insides. Your body feels numb, too numb to even raise a finger. You collapse. Your life flashes before your eyes. Your family, your pet, your job, all the sweet memories, all the bad memories. You miss it all, you miss your normal life. "How did this happen?" One thought clears your brain, almost too loud and clear to be a thought. "How did I end up in this place? What led to this? Whe-." your thoughts are interrupted with a memory. A memory, clear as day."""
+        self.threshold = """Your head feels hollow, like an egg missing its insides. Your body feels numb, too numb to even raise a finger. You collapse."""
+        self.threshold2 = """Your head feels hollow, like an egg missing its insides. Your body feels numb, too numb to even raise a finger. You collapse. Your life flashes before your eyes. Your family, your pet, your job, all the sweet memories, all the bad memories. You miss it all, you miss your normal life."""
+        self.threshold3 = """Your head feels hollow, like an egg missing its insides. Your body feels numb, too numb to even raise a finger. You collapse. Your life flashes before your eyes. Your family, your pet, your job, all the sweet memories, all the bad memories. You miss it all, you miss your normal life. "How did this happen?" One thought clears your brain, almost too loud and clear to be a thought."""
+        self.type_awaken6 = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.awaken_text, self.awaken_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.3
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken6, 1, self.threshold), pause_time)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.collapse.play(), pause_time - len("You collapse") * 0.05)
+        pause_time2 = len(self.threshold2) * 0.05 + 0.6
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken6, 3, self.threshold2), pause_time2)
+        pause_time3 = len(self.threshold3) * 0.05 + 3.2
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_awaken6, 0.7, self.threshold3), pause_time3)
+        schedule_time = len(self.awaken_text) * 0.05 + 3.9
+        Clock.schedule_once(lambda dt: self.add_continue(dt, self.awaken7), schedule_time)
+    
+    def awaken7(self, instance):
+        self.layout.remove_widget(instance)
+        self.awaken_label.text = ""
+        self.awaken_label.font_size = "17sp"
+        self.awaken_text = """A group of people, in what appears to be a diner. A scientist you seem to know but can't remember, his assistants, a friendly face you recall to be a neighbour, a friend of yours, and finally, you. "I have been thinking about an experiment," the scientist says, "a simulation, where people put their lives in danger, and their survival skills are tested." "How interesting," you remark, "What's the idea behind this experiment?" "Simple," the scientist replies, "people in this experiment KNOW they are in a simulation, we want to see how much the human body prepares for survival, even when knowing their lives aren't in any real danger." "How intriguing," your friend remarks, "What type of danger are you simulating though?" "A dark cave was our first thought." An assistant replies, "We thought it was an easy scenario to deal with for a starting prototype. It can change later" """
+        self.type_awaken7 = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.awaken_text, self.awaken_label), 0.05)
+        schedule_time = len(self.awaken_text) * 0.05
+        Clock.schedule_once(lambda dt: self.add_continue(dt, self.awaken8), schedule_time)
+    
+    def awaken8(self, instance):
+        self.layout.remove_widget(instance)
+        self.awaken_label.text = ""
+        self.awaken_label.font_size = "20sp"
+        self.awaken_text = """The memory stops there, you can't bring yourself to recall anything after that memory, as your mind is stuck on one question, like a tape that is put on repeat. "Is this a simulation?" "Is this a simulation?" "Is this a simulation?" You pick yourself up, barely able to get to your feet that can barely handle your weight. Swaying, stumbling your way over to the wall, you pull your head as far up and back as you can while maintaining balance."""
+        self.tick1= """The memory stops there, you can't bring yourself to recall anything after that memory, as your mind is stuck on one question, like a tape that is put on repeat. "Is this a simulation?" """
+        self.tick2 = """The memory stops there, you can't bring yourself to recall anything after that memory, as your mind is stuck on one question, like a tape that is put on repeat. "Is this a simulation?" "Is this a simulation?" """
+        self.tick3 = """The memory stops there, you can't bring yourself to recall anything after that memory, as your mind is stuck on one question, like a tape that is put on repeat. "Is this a simulation?" "Is this a simulation?" "Is this a simulation?" """
+        self.tickthresh = 4
+        self.textthreshold = """The memory stops there, you can't bring yourself to recall anything after that memory, as your mind is stuck on one question, like a tape that is put on repeat."""
+        self.type_awaken8 = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.awaken_text, self.awaken_label), 0.05)
+        pause_time = len(self.textthreshold) * 0.05 - 0.4
+        Clock.schedule_once(lambda dt: self.tick_prep(dt, self.type_awaken8, self.textthreshold, self.awaken_label, self.awaken_text, 1.5), pause_time)
+        self.remaining_text = (len(self.awaken_text) - len(self.tick3)) * 0.05
+        schedule_time = len(self.awaken_text) * 0.05 + self.tickthresh + 3
+        Clock.schedule_once(lambda dt: self.add_continue(dt, self.Fawaken), schedule_time) 
+    
+    def Fawaken(self, instance):
+        self.layout.remove_widget(instance)
+        self.awaken_label.text = ""
+        self.awaken_text
     
     def option_menu(self, instance):
         self.layout.clear_widgets()
@@ -2915,6 +2990,14 @@ class AdventureApp(App):
         self.char_index = len(pause_quota)
         typewrite_function.cancel()
         self.resumption = Clock.schedule_once(typewrite_function, duration)
+    
+    def tick_prep(self, dt, typewrite_method, pause_quota, label, full_text, interval):
+        self.typed_label.text = pause_quota
+        try:
+            typewrite_method.cancel()
+        except:
+            pass
+        Clock.schedule_interval(lambda dt: self.ticking(dt, label, full_text), interval)
     
     def ticking(self, dt, label, full_text):
         if self.counter < self.tickthresh:
@@ -3049,6 +3132,7 @@ class AdventureApp(App):
         self.layout.add_widget(self.died_label)
         self.layout.add_widget(self.cod_label)
         self.death_count += 1
+        self.store.put("deaths", count=self.death_count)
         
         Clock.schedule_interval(lambda dt: self.image_appear(dt, self.died_label, 1), 0.1)
         Clock.schedule_interval(lambda dt: self.image_appear(dt, self.cod_label, 1), 0.2)
@@ -3141,6 +3225,10 @@ class AdventureApp(App):
         if self.ambience_on:
             self.main_menu_btn.bind(on_press=self.end_win)
         
+        if not self.exit_num in self.found_exits:
+            self.found_exits.append(self.exit_num)
+            self.store.put("exits", found=self.found_exits)
+        
         self.vic_label.opacity = 0
         self.died_no.opacity = 0
         self.exit_no.opacity = 0
@@ -3160,6 +3248,7 @@ class AdventureApp(App):
         
     def resetdeaths(self, instance):
         self.death_count = 0
+        self.store.put("deaths", count=self.death_count)
     
     def end_win(self, instance):
         try:
