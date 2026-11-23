@@ -1,0 +1,8 @@
+#how to get an attribute dynamically:
+    getattr(object, 'attributename')
+    #This makes python search for a variable named (attributename) inside the object, for example:
+        self.counter = 1
+        x = getattr(self, f"tick{self.counter}")
+        #this will set x to equal self.tick1, however, if we raised self.counter's number:
+            self.counter +=1
+            #x will equal self.tick2, and so on. 
