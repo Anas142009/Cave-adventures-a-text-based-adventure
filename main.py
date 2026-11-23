@@ -228,12 +228,13 @@ class AdventureApp(App):
         
     def main_menu(self, instance):
         self.layout.clear_widgets()
-        #default values:
+        #default values:{
         self.havegrapple = False
         self.started = False
         self.right_grnd_brkn = False
         self.batted = False
         self.quick_timer = 5
+        self.counter = 1
         if self.headbutt:
             self.headbutt.volume = 1
             self.headbutt.loop = False
@@ -250,6 +251,13 @@ class AdventureApp(App):
         else:
             self.death_count = 0
             self.store.put("deaths", count=self.death_count)
+        if self.store.exists("access"):
+            self.access = self.store.get("access")
+            self.hasaccess = self.access["has"]
+        else:
+            self.hasaccess = False
+            self.store.put("access", has=self.hasaccess)
+        #}
         
         self.gamename = Label(
             text="CAVE\nADVENTURES",
@@ -302,6 +310,19 @@ class AdventureApp(App):
             bold=True
         )
         
+        self.archive_btn = Button(
+            text="Enter\nThe\nArchive",
+            font_size="24sp",
+            size_hint=(0.25, 0.2),
+            pos_hint={'x': 0, 'y': 0.1},
+            background_color=[0.1, 1, 0.1, 1],
+            color=[0.1, 0.1, 1, 1],
+            text_size=(Window.width * 0.25, Window.height * 0.2),
+            halign='center',
+            valign='center'
+        )
+        self.archive_btn.bind(on_press=self.Rarchive)
+        
         self.secret_btn = Button(
             text="secret code",
             font_size="10sp",
@@ -344,10 +365,12 @@ class AdventureApp(App):
             pos_hint={'x': 0, 'top': 0.95},
             font_size="9sp"
         )
-        self.test_btn.bind(on_press=self.stuck)
+        self.test_btn.bind(on_press=self.Rarchive)
         self.layout.add_widget(self.test_btn)
         #)
-        
+                
+        if hasattr(self, "hasaccess") and self.hasaccess:
+            self.layout.add_widget(self.archive_btn)
         
         if self.ambience_on == True:
             self.ambience.play()
@@ -2397,7 +2420,8 @@ class AdventureApp(App):
             text_size=(Window.width * 0.9, Window.height * 0.6),
             halign='left',
             valign='top',
-            bold=True
+            bold=True,
+            markup=True
         )
         self.main_menu_button = Button(
             text="return to main menu",
@@ -2435,6 +2459,8 @@ class AdventureApp(App):
     
     def story(self, instance):
         self.layout.clear_widgets()
+        self.hasaccess = True
+        self.store.put("access", has=self.hasaccess)
         self.story_label = Label(
             text="DISCLAIMER\n\nThis game's story, names, and locations are entirely fictional. Any similarity to real-life objects or people is entirely coincidential..",
             font_size="27sp",
@@ -2519,7 +2545,20 @@ class AdventureApp(App):
             self.next_btn.text = "next page -->"
             self.next_btn.bind(on_press=self.next_page)
         elif self.page_no == 4:
-            self.story_label.text = "As a test subject within the HRIT project, they give you drugs that cause memory loss, which is why you barely remember anything when you first wake up. The other thing they do to you is plant chips inside of you for tracking. These chips act as vitals trackers tracking your Bp, heart rate, and other vitals. They also act as location trackers, allowing them to continuously know where you are and what you're doing. The HRIT started many years ago, when the head of the HRRO realized their research was too limited and needed to expand. Each HRIT testing site's records and findings are recorded and stored in a database hidden within the many databases in the HRRO's base of operations." 
+            self.story_label.text = "As a test subject within the HRIT project, they give you drugs that cause memory loss, which is why you barely remember anything when you first wake up. The other thing they do to you is plant chips inside of you for tracking. These chips act as vitals trackers tracking your Bp, heart rate, and other vitals. They also act as location trackers, allowing them to continuously know where you are and what you're doing. The HRIT started many years ago, when the head of the HRRO realized their research was too limited and needed to expand. Each HRIT testing site's records and findings are recorded and stored in a database hidden within the many databases in the HRRO's base of operations.\nTHE    END" 
+            self.oii_label = Label(
+                text="or is it?",
+                font_size="11sp",
+                size_hint=(1, 0.1),
+                pos_hint={'right': 1, 'y': 0.41},
+                text_size=(Window.width * 0.4, Window.height * 0.1),
+                halign='left',
+                valign='bottom',
+                italic=True,
+                color=self.brown
+            )
+            if "1" in self.found_exits and "2" in self.found_exits and "3" in self.found_exits:
+                self.layout.add_widget(self.oii_label)
             self.next_btn.text = "done reading"
             self.next_btn.unbind(on_press=self.next_page)
             self.next_btn.bind(on_press=self.Rarchive)
@@ -2661,6 +2700,77 @@ class AdventureApp(App):
         
     
     def longer(self, instance):
+        self.layout.clear_widgets()
+        self.long_text = "You press the eastern button. Before you get a chance to react, the ground below you shatters, and you fall into what seems to be a bottomless pit."
+        self.threshold = "You press the eastern button."
+        self.threshold2 = "You press the eastern button. Before you get a chance to react, the ground below you shatters,"
+        self.long_label = Label(
+            text="",
+            font_size="28sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True,
+            color=self.brown
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.long_label)
+        
+        self.type_long = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.long_text, self.long_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.1
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_long, 2, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 + 1.6
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_long, 0.5, self.threshold2), pause_time2)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.death_sound.play(), pause_time2)
+        schedule_time = len(self.long_text) * 0.05 + 4
+        Clock.schedule_once(lambda dt: self.add_continue(dt, self.prepstair), schedule_time)
+    
+    def prepstair(self, instance):
+        self.layout.clear_widgets()
+        self.prep_text = "You land on a matress. It seems it was set up to cushion your fall. There is only one path for you to follow, it appears there is light at the end of this tunnel. You follow the light."
+        self.prep_label = Label(
+            text="",
+            font_size="28sp",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halifn='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.prep_label)
+        self.layout.add_widget(self.skip_button)
+        self.current_skip_func = self.skip_prep
+        self.skip_button.bind(on_press=self.skip_prep)
+        
+        self.type_prep = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.prep_text, self.prep_label), 0.05)
+        schedule_time = len(self.prep_text) * 0.05
+        self.contprep = Clock.schedule_once(lambda dt: self.add_continue(dt, self.stair), schedule_time)
+        
+    def skip_prep(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_prep.cancel()
+            self.contprep.cancel()
+            Clock.schedule_once(self.stair, 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)    
+    
+    def stair(self, instance):
         self.layout.clear_widgets()
     
     def trap(self, instance):
@@ -2874,16 +2984,38 @@ class AdventureApp(App):
         self.tickthresh = 4
         self.textthreshold = """The memory stops there, you can't bring yourself to recall anything after that memory, as your mind is stuck on one question, like a tape that is put on repeat."""
         self.type_awaken8 = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.awaken_text, self.awaken_label), 0.05)
-        pause_time = len(self.textthreshold) * 0.05 - 0.4
+        pause_time = len(self.textthreshold) * 0.05 - 0.55
         Clock.schedule_once(lambda dt: self.tick_prep(dt, self.type_awaken8, self.textthreshold, self.awaken_label, self.awaken_text, 1.5), pause_time)
         self.remaining_text = (len(self.awaken_text) - len(self.tick3)) * 0.05
-        schedule_time = len(self.awaken_text) * 0.05 + self.tickthresh + 3
+        schedule_time = len(self.awaken_text) * 0.05 + self.tickthresh + 2
         Clock.schedule_once(lambda dt: self.add_continue(dt, self.Fawaken), schedule_time) 
     
     def Fawaken(self, instance):
         self.layout.remove_widget(instance)
         self.awaken_label.text = ""
-        self.awaken_text
+        self.awaken_label.markup = True
+        self.awaken_text = """*CRACK* A loud sound, coming straight from your head that you've rammed to the wall. Blood, drips over your face, like water washing down a window after heavy rain. The pain, you can feel it, even though your whole body is numb. "This is not a simulation." A simple yet very cruel realization, all your hope is gone, your body, number than ever, fails you. You collapse. Your mind, fades away, like light getting sucked into a vacuum. Despair, consumes you, like a savage beast eating at your body."""
+        self.threshold = """*CRACK*"""
+        self.threshold2 = """*CRACK* A loud sound, coming straight from your head that you've rammed to the wall."""
+        self.threshold3 = """*CRACK* A loud sound, coming straight from your head that you've rammed to the wall. Blood, drips over your face, like water washing down a window after heavy rain. The pain, you can feel it, even though your whole body is numb."""
+        self.threshold4 = """*CRACK* A loud sound, coming straight from your head that you've rammed to the wall. Blood, drips over your face, like water washing down a window after heavy rain. The pain, you can feel it, even though your whole body is numb. "This is not a simulation." A simple yet very cruel realization, all your hope is gone, your body, number than ever, fails you. You collapse."""
+        if self.effects_on:
+            self.headbutt.volume = 0.8
+            self.headbutt.play()
+        self.type_Fawaken = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.awaken_text, self.awaken_label), 0.05)
+        pause_time = len(self.threshold) * 0.05
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_Fawaken, 0.5, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 + 0.25
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_Fawaken, 0.5, self.threshold2), pause_time2)
+        pause_time3 = len(self.threshold3) * 0.05 + 0.65
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_Fawaken, 0.5, self.threshold3), pause_time3)
+        pause_time4 = len(self.threshold4) * 0.05 + 0.95
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_Fawaken, 0.5, self.threshold4), pause_time4)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.collapse.play(), pause_time4)
+        schedule_time = len(self.awaken_text) * 0.05 + 3
+        self.cod = "trapped forever"
+        Clock.schedule_once(lambda dt: self.game_over(dt, self.two_btns), schedule_time)
     
     def option_menu(self, instance):
         self.layout.clear_widgets()
@@ -3006,6 +3138,7 @@ class AdventureApp(App):
         else:
             self.char_index = len(label.text)
             Clock.schedule_interval(lambda dt: self.typewrite(dt, full_text, label), 0.05)
+            self.counter = 1
             return False
                 
     def typewrite(self, dt, target_text, label):
