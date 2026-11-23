@@ -1858,6 +1858,7 @@ class AdventureApp(App):
                     self.arawareru.cancel()
                 except:
                     pass
+                self.fork_image.opacity = 0.8
             self.left_options.cancel()
             self.char_index = 0
             try:
@@ -2634,7 +2635,7 @@ class AdventureApp(App):
     
     def two_btns(self, instance):
         self.layout.clear_widgets()
-        self.two_text = "You follow the right path. You reach the light source, two small holes in the ceiling similar to the ones at the first fork. These holes are lighting a big empty square area. In the center of the eastern and western walls are two small holes, each of which has a button in it. Neither button has a label on it, and both of them look exactly the same. Which button do you press?"
+        self.two_text = "You follow the right path. You reach the light source, a small hole in the ceiling similar to the ones at the first fork. This hole is lighting a big empty square area. In the center of the eastern and western walls are two small holes, each of which has a button in it. Neither button has a label on it, and both of them look exactly the same. Which button do you press?"
         self.threshold="You follow the right path."
         self.two_label = Label(
             text="",
@@ -2647,6 +2648,15 @@ class AdventureApp(App):
             valign='top',
             bold=True
         )
+        self.two_image = Image(
+            source="assets/two_btns.png",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+        )
+        if self.images_on:
+            self.layout.add_widget(self.two_image)
         self.layout.add_widget(self.text_background)
         self.layout.add_widget(self.two_label)
         self.current_skip_func = self.skip_two
@@ -2701,7 +2711,7 @@ class AdventureApp(App):
     
     def longer(self, instance):
         self.layout.clear_widgets()
-        self.long_text = "You press the eastern button. Before you get a chance to react, the ground below you shatters, and you fall into what seems to be a bottomless pit."
+        self.long_text = "You press the eastern button. Before you get a chance to react, the ground below you shatters, and you fall."
         self.threshold = "You press the eastern button."
         self.threshold2 = "You press the eastern button. Before you get a chance to react, the ground below you shatters,"
         self.long_label = Label(
@@ -2738,7 +2748,7 @@ class AdventureApp(App):
             pos_hint={'center_x': 0.5, 'top': 0.95},
             text_size=(Window.width * 0.9, Window.height * 0.6),
             color=self.brown,
-            halifn='left',
+            halign='left',
             valign='top',
             bold=True
         )
@@ -2757,7 +2767,7 @@ class AdventureApp(App):
             self.typed_label.text = self.targeted
             self.type_prep.cancel()
             self.contprep.cancel()
-            Clock.schedule_once(self.stair, 0)
+            Clock.schedule_once(lambda dt: self.add_continue(dt, self.stair), 0)
             self.char_index = 0
             try:
                 self.resumption.cancel()
@@ -2771,6 +2781,131 @@ class AdventureApp(App):
             self.layout.remove_widget(self.skip_button)    
     
     def stair(self, instance):
+        self.layout.clear_widgets()
+        self.stair_text = """You reach the light source, it doesn't surprise you anymore. Two holes, just like the ones you've seen before. You can see two paths, but they don't look natural. The path to your right spirals downwards, just like a spiral saircase. The path to your left spirals upwards, just like the one to the right. Which path will you take?"""
+        self.threshold = """You reach the light source, it doesn't surprise you anymore. Two holes, just like the ones you've seen before. You can see two paths, but they don't look natural."""
+        self.threshold2 = """You reach the light source, it doesn't surprise you anymore. Two holes, just like the ones you've seen before. You can see two paths, but they don't look natural. The path to your right spirals downwards, just like a spiral saircase"""
+        self.threshold3 = """You reach the light source, it doesn't surprise you anymore. Two holes, just like the ones you've seen before. You can see two paths, but they don't look natural. The path to your right spirals downwards, just like a spiral saircase. The path to your left spirals upwards, just like the one to the right."""
+        self.stair_label = Label(
+            text="",
+            font_size="22sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=self.brown,
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.stair_label)
+        self.layout.add_widget(self.skip_button)
+        self.current_skip_func = self.skip_stair
+        self.skip_button.bind(on_press=self.skip_stair)
+        
+        self.type_stair = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.stair_text, self.stair_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.6
+        self.pause_stair = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_stair, 0.5, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 - 0.2
+        self.pause_stair2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_stair, 0.5, self.threshold2), pause_time2)
+        pause_time3 = len(self.threshold3) * 0.05 + 0.25
+        self.pause_stair3 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_stair, 0.5, self.threshold3), pause_time3)
+        schedule_time = len(self.stair_text) * 0.05 + 1
+        self.stairopts = Clock.schedule_once(self.stairway, schedule_time)
+    
+    def skip_stair(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_stair.cancel()
+            self.pause_stair.cancel()
+            self.pause_stair2.cancel()
+            self.pause_stair3.cancel()
+            self.stairopts.cancel()
+            Clock.schedule_once(self.stairway, 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+    
+    def stairway(self, dt):
+        self.up_btn = Button(
+            text="\n\n\nGo upwards",
+            font_size="20sp",
+            size_hint=(0.3, 0.4),
+            pos_hint={'x': 0.1, 'center_y': 0.2},
+            background_color=self.brown,
+            text_size=(Window.width * 0.3, Window.height * 0.4),
+            halign='center',
+            valign='top',
+            bold=True
+        )
+        self.up_btn.bind(on_press=self.upward)
+        self.down_btn = Button(
+            text="Go downwards\n\n\n",
+            size_hint=(0.3, 0.4),
+            font_size="20sp",
+            pos_hint={'right': 0.9, 'center_y': 0.2},
+            background_color=self.brown,
+            text_size=(Window.width * 0.3, Window.height * 0.4),
+            halign='center',
+            valign='bottom',
+            bold=True
+        )
+        self.down_btn.bind(on_press=self.downward)
+        self.layout.add_widget(self.up_btn)
+        self.layout.add_widget(self.down_btn)
+    
+    def upward(self, instance):
+        self.layout.clear_widgets()
+        self.up_text = """You follow the spiral upwards. Moments later, you reach a dead end. It seems there might not be anything here, but you can take a closer look."""
+        self.up_label = Label(
+            text="",
+            font_size="27sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            color=self.brown,
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.up_label)
+        
+        self.type_up = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.up_text, self.up_label), 0.05)
+        schedule_time = len(self.up_text) * 0.05
+        Clock.schedule_once(self.upopts, schedule_time)
+    
+    def upopts(self, dt):
+        self.inspect_btn = Button(
+            text="Try to inspect the wall",
+            font_size="20sp",
+            size_hint=(1, 0.2),
+            pos_hint={'center_x': 0.5, 'center_y': 0.3},
+            background_color=self.brown,
+            bold=True
+        )
+        
+        self.backdown_btn = Button(
+            text="Go back down",
+            font_size="20sp",
+            size_hint=(1, 0.2),
+            pos_hint={'center_x': 0.5, 'center_y': 0.1},
+            background_color=self.brown,
+            bold=True
+        )
+        
+        self.layout.add_widget(self.inspect_btn)
+        self.layout.add_widget(self.backdown_btn)
+    
+    def downward(self, instance):
         self.layout.clear_widgets()
     
     def trap(self, instance):
