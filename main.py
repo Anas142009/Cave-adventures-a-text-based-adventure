@@ -235,6 +235,7 @@ class AdventureApp(App):
         self.batted = False
         self.quick_timer = 5
         self.counter = 1
+        self.upped = False
         if self.headbutt:
             self.headbutt.volume = 1
             self.headbutt.loop = False
@@ -2782,7 +2783,10 @@ class AdventureApp(App):
     
     def stair(self, instance):
         self.layout.clear_widgets()
-        self.stair_text = """You reach the light source, it doesn't surprise you anymore. Two holes, just like the ones you've seen before. You can see two paths, but they don't look natural. The path to your right spirals downwards, just like a spiral saircase. The path to your left spirals upwards, just like the one to the right. Which path will you take?"""
+        if self.upped:
+            self.stair_text = """You go back down the spiraling path. You are back in front of the two spiraling path. Which one do you take?"""
+        else:
+            self.stair_text = """You reach the light source, it doesn't surprise you anymore. Two holes, just like the ones you've seen before. You can see two paths, but they don't look natural. The path to your right spirals downwards, just like a spiral saircase. The path to your left spirals upwards, just like the one to the right. Which path will you take?"""
         self.threshold = """You reach the light source, it doesn't surprise you anymore. Two holes, just like the ones you've seen before. You can see two paths, but they don't look natural."""
         self.threshold2 = """You reach the light source, it doesn't surprise you anymore. Two holes, just like the ones you've seen before. You can see two paths, but they don't look natural. The path to your right spirals downwards, just like a spiral saircase"""
         self.threshold3 = """You reach the light source, it doesn't surprise you anymore. Two holes, just like the ones you've seen before. You can see two paths, but they don't look natural. The path to your right spirals downwards, just like a spiral saircase. The path to your left spirals upwards, just like the one to the right."""
@@ -2803,23 +2807,29 @@ class AdventureApp(App):
         self.current_skip_func = self.skip_stair
         self.skip_button.bind(on_press=self.skip_stair)
         
+        if self.upped:
+            self.stair_label.font_size = "27sp"
         self.type_stair = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.stair_text, self.stair_label), 0.05)
-        pause_time = len(self.threshold) * 0.05 - 0.6
-        self.pause_stair = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_stair, 0.5, self.threshold), pause_time)
-        pause_time2 = len(self.threshold2) * 0.05 - 0.2
-        self.pause_stair2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_stair, 0.5, self.threshold2), pause_time2)
-        pause_time3 = len(self.threshold3) * 0.05 + 0.25
-        self.pause_stair3 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_stair, 0.5, self.threshold3), pause_time3)
-        schedule_time = len(self.stair_text) * 0.05 + 1
+        if not self.upped:
+            pause_time = len(self.threshold) * 0.05 - 0.6
+            self.pause_stair = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_stair, 0.5, self.threshold), pause_time)
+            pause_time2 = len(self.threshold2) * 0.05 - 0.2
+            self.pause_stair2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_stair, 0.5, self.threshold2), pause_time2)
+            pause_time3 = len(self.threshold3) * 0.05 + 0.25
+            self.pause_stair3 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_stair, 0.5, self.threshold3), pause_time3)
+            schedule_time = len(self.stair_text) * 0.05 + 1
+        else:
+            schedule_time = len(self.stair_text) * 0.05 - 0.1
         self.stairopts = Clock.schedule_once(self.stairway, schedule_time)
     
     def skip_stair(self, instance):
         if self.char_index < len(self.targeted):
             self.typed_label.text = self.targeted
             self.type_stair.cancel()
-            self.pause_stair.cancel()
-            self.pause_stair2.cancel()
-            self.pause_stair3.cancel()
+            if not self.upped:
+                self.pause_stair.cancel()
+                self.pause_stair2.cancel()
+                self.pause_stair3.cancel()
             self.stairopts.cancel()
             Clock.schedule_once(self.stairway, 0)
             self.char_index = 0
@@ -2886,24 +2896,78 @@ class AdventureApp(App):
     def upopts(self, dt):
         self.inspect_btn = Button(
             text="Try to inspect the wall",
-            font_size="20sp",
+            font_size="24sp",
             size_hint=(1, 0.2),
             pos_hint={'center_x': 0.5, 'center_y': 0.3},
-            background_color=self.brown,
-            bold=True
+            background_color=self.brown
         )
-        
+        self.inspect_btn.bind(on_press=self.inspected)
         self.backdown_btn = Button(
             text="Go back down",
-            font_size="20sp",
+            font_size="24sp",
             size_hint=(1, 0.2),
             pos_hint={'center_x': 0.5, 'center_y': 0.1},
-            background_color=self.brown,
-            bold=True
+            background_color=self.brown
         )
-        
+        self.backdown_btn.bind(on_press=self.stairagain)
+   
         self.layout.add_widget(self.inspect_btn)
         self.layout.add_widget(self.backdown_btn)
+    
+    def stairagain(self, instance):
+        self.layout.clear_widgets()
+        self.stair_text = """You go back down the spiraling path. You are back in front of the two spiraling paths. Which one do you take?"""
+        self.stair_label = Label(
+            text="",
+            font_size="27sp",
+            color=self.brown,
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.stair_label)
+        
+        self.type_stair = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.stair_text, self.stair_label), 0.05)
+        schedule_time = len(self.stair_text) * 0.05 - 0.2
+        Clock.schedule_once(self.stairway, schedule_time)  
+    
+    def inspected(self, instance):
+        self.layout.clear_widgets()
+        self.inspected_text = """You put your hands on the wall. You start touching around on it. The wall gets pushed in, like a button. Then, before you get a chance to react, a burst of bullets pierce you like a piece of paper. The bullets came from machine guns behind the wall which opened like an elevator door. You are now as full og holes as a sponge.""" 
+        self.threshold = """You put your hands on the wall. You start touching around on it."""
+        self.threshold2 = """You put your hands on the wall. You start touching around on it. The wall gets pushed in, like a button. Then, before you get a chance to react,"""
+        self.inspected_label = Label(
+            text="",
+            font_size="22sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=self.brown,
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.inspected_label)
+        
+        self.type_inspected = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.inspected_text, self.inspected_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.2
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_inspected, 1, self.threshold), pause_time)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.click.play(), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 + 0.8
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_inspected, 2.5, self.threshold2), pause_time2)
+            schedule_time = len(self.inspected_text) * 0.05 + 4.5
+        else:
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_inspected, 1, self.threshold2), pause_time2)
+            schedule_time = len(self.inspected_text) * 0.05 + 3.2
+        self.cod = "shot to death"
+        Clock.schedule_once(lambda dt: self.game_over(dt, self.stair), schedule_time)
     
     def downward(self, instance):
         self.layout.clear_widgets()
@@ -3151,6 +3215,9 @@ class AdventureApp(App):
         schedule_time = len(self.awaken_text) * 0.05 + 3
         self.cod = "trapped forever"
         Clock.schedule_once(lambda dt: self.game_over(dt, self.two_btns), schedule_time)
+    
+    def make_true(self, variable):
+        variable = True
     
     def option_menu(self, instance):
         self.layout.clear_widgets()
