@@ -236,6 +236,8 @@ class AdventureApp(App):
         self.quick_timer = 5
         self.counter = 1
         self.upped = False
+        self.op_no = 0
+        self.returned = False
         if self.headbutt:
             self.headbutt.volume = 1
             self.headbutt.loop = False
@@ -366,7 +368,7 @@ class AdventureApp(App):
             pos_hint={'x': 0, 'top': 0.95},
             font_size="9sp"
         )
-        self.test_btn.bind(on_press=self.Rarchive)
+        self.test_btn.bind(on_press=self.stair)
         self.layout.add_widget(self.test_btn)
         #)
                 
@@ -2801,6 +2803,15 @@ class AdventureApp(App):
             valign='top',
             bold=True
         )
+        self.stair_image = Image(
+            source="assets/stairway.png",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+        )
+        if self.images_on:
+            self.layout.add_widget(self.stair_image)
         self.layout.add_widget(self.text_background)
         self.layout.add_widget(self.stair_label)
         self.layout.add_widget(self.skip_button)
@@ -2886,6 +2897,15 @@ class AdventureApp(App):
             color=self.brown,
             bold=True
         )
+        self.up_image = Image(
+            source="assets/dead_end.png",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+        )
+        if self.images_on:
+            self.layout.add_widget(self.up_image)
         self.layout.add_widget(self.text_background)
         self.layout.add_widget(self.up_label)
         
@@ -2928,6 +2948,8 @@ class AdventureApp(App):
             valign='top',
             bold=True
         )
+        if self.images_on:
+            self.layout.add_widget(self.stair_image)
         self.layout.add_widget(self.text_background)
         self.layout.add_widget(self.stair_label)
         
@@ -2937,7 +2959,7 @@ class AdventureApp(App):
     
     def inspected(self, instance):
         self.layout.clear_widgets()
-        self.inspected_text = """You put your hands on the wall. You start touching around on it. The wall gets pushed in, like a button. Then, before you get a chance to react, a burst of bullets pierce you like a piece of paper. The bullets came from machine guns behind the wall which opened like an elevator door. You are now as full og holes as a sponge.""" 
+        self.inspected_text = """You put your hands on the wall. You start touching around on it. The wall gets pushed in, like a button. Then, before you get a chance to react, a burst of bullets pierce you like a piece of paper. The bullets came from machine guns behind the wall which opened like an elevator door. You are now as full of holes as a sponge.""" 
         self.threshold = """You put your hands on the wall. You start touching around on it."""
         self.threshold2 = """You put your hands on the wall. You start touching around on it. The wall gets pushed in, like a button. Then, before you get a chance to react,"""
         self.inspected_label = Label(
@@ -2959,9 +2981,10 @@ class AdventureApp(App):
         Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_inspected, 1, self.threshold), pause_time)
         if self.effects_on:
             Clock.schedule_once(lambda dt: self.click.play(), pause_time)
-        pause_time2 = len(self.threshold2) * 0.05 + 0.8
+        pause_time2 = len(self.threshold2) * 0.05 + 0.7
         if self.effects_on:
             Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_inspected, 2.5, self.threshold2), pause_time2)
+            Clock.schedule_once(lambda dt: self.shot.play(), pause_time2)
             schedule_time = len(self.inspected_text) * 0.05 + 4.5
         else:
             Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_inspected, 1, self.threshold2), pause_time2)
@@ -2970,6 +2993,372 @@ class AdventureApp(App):
         Clock.schedule_once(lambda dt: self.game_over(dt, self.stair), schedule_time)
     
     def downward(self, instance):
+        self.layout.clear_widgets()
+        self.op_no += 1
+        if self.op_no == 1:
+            self.down_text = """You follow the right spiral downwards. As you are walking downwards, you see an opening to your left. Do you take the opening or keep heading down?"""
+        else:
+            self.down_text = """You keep heading downwards. You see another opening to your left. Do you want to take the opening or keep heading down?"""
+        self.down_label = Label(
+            text="",
+            font_size="27sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=self.brown,
+            bold=True,
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top'
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.down_label)
+        self.current_skip_func = self.skip_down
+        self.layout.add_widget(self.skip_button)
+        self.skip_button.bind(on_press=self.skip_down)
+        
+        self.type_down = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.down_text, self.down_label), 0.05)
+        schedule_time = len(self.down_text) * 0.05
+        self.op_opts = Clock.schedule_once(self.downopts, schedule_time)
+    
+    def skip_down(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_down.cancel()
+            self.op_opts.cancel()
+            Clock.schedule_once(self.downopts, 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+    
+    def downopts(self, dt):
+        self.take_btn = Button(
+            text="Take the opening",
+            font_size="24sp",
+            size_hint=(1, 0.2),
+            pos_hint={'center_x': 0.5, 'top': 0.4},
+            background_color=self.brown
+        )
+        if self.op_no == 5:
+            self.take_btn.bind(on_press=self.SE)
+        else:
+            self.take_btn.bind(on_press=self.wrong_turn)
+        self.keep_btn = Button(
+            text="Keep going down",
+            font_size="24sp",
+            size_hint=(1, 0.2),
+            pos_hint={'center_x': 0.5, 'y': 0},
+            background_color=self.brown
+        )
+        if self.op_no == 9:
+            self.keep_btn.bind(on_press=self.password)
+        else:
+            self.keep_btn.bind(on_press=self.downward)
+        self.layout.add_widget(self.take_btn)
+        self.layout.add_widget(self.keep_btn)
+    
+    def wrong_turn(self, instance):
+        self.layout.clear_widgets()
+        self.wrong_text = """You take the opening to your left. A few steps in, a boulder blocks the opening behind you. Then, before you get a chance to react, a burst of bullets pierce you like a piece of paper. It seems the walls to your left and right were set up to open up and reveal a set of machine guns arranged across them. You are now as full of holes as a sponge."""
+        self.threshold = """You take the opening to your left. A few steps in,"""
+        self.threshold2 = """You take the opening to your left. A few steps in, a boulder blocks the opening behind you. Then, before you get a chance to react,"""
+        self.wrong_label = Label(
+            text="",
+            font_size="22sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=self.brown,
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.wrong_label)
+        
+        self.type_wrongturn = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.wrong_text, self.wrong_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.1
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_wrongturn, 0.5, self.threshold), pause_time)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.bouldercrash.play(), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 + 0.2
+        if self.effects_on:
+            self.duration = 2.5
+            Clock.schedule_once(lambda dt: self.shot.play(), pause_time2)
+            schedule_time = len(self.wrong_text) * 0.05 + 3
+        else:
+            self.duration = 1
+            schedule_time = len(self.wrong_text) * 0.05 + 1.5
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_wrongturn, self.duration, self.threshold2), pause_time2)
+        self.cod = "shot to death"
+        Clock.schedule_once(lambda dt: self.game_over(dt, self.stair), schedule_time)
+        self.op_no = 0
+    
+    def password(self, instance):
+        self.layout.clear_widgets()
+        if not hasattr(self, 'passed1') or not self.returned:
+            self.password_hint = "How many openings did you pass by?"
+            self.passed1= True
+            self.returned = True
+            self.passed2 = False
+        elif self.passed1 == True and not self.passed2:
+            self.password_hint = "What was the button you pressed last time?"
+            self.passed2 = True
+        else:
+            self.password_hint = "Solve: x - y\n where: x = The number of openings you passed by, y = The button you pressed last."
+            self.returned = False
+        self.pass_text = f"""You keep heading down. The spiral finally reaches an end, and the path is now straight. A few steps forward, you now stand directly in front of a metal door with what appears to be an elevator's keypad numbered zero through nine next to it. There is a note attached to it, it reads, "{self.password_hint}". What do you input?"""
+        self.threshold = f"""You keep heading down. The spiral finally reaches an end, and the path is now straight. A few steps forward, you now stand directly in front of a metal door with what appears to be an elevator's keypad numbered zero through nine next to it."""
+        self.pass_label = Label(
+            text="",
+            font_size="20sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=self.brown,
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.pass_image = Image(
+            source="assets/second_puzzle.png",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+        )
+        if self.images_on:
+            self.layout.add_widget(self.pass_image)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.pass_label)
+        self.current_skip_func = self.skip_pass
+        self.layout.add_widget(self.skip_button)
+        self.skip_button.bind(on_press=self.skip_pass)
+         
+        self.type_pass = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.pass_text, self.pass_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.8
+        self.pause_pass = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_pass, 0.5, self.threshold), pause_time)
+        schedule_time = len(self.pass_text) * 0.05
+        self.buttons = Clock.schedule_once(self.lift_btns, schedule_time)
+    
+    def skip_pass(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_pass.cancel()
+            try:
+                self.pause_pass.cancel()
+            except:
+                pass
+            self.buttons.cancel()
+            Clock.schedule_once(self.lift_btns, 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)    
+    
+    def lift_btns(self, dt):
+        self.one_btn = Button(
+            text="1",
+            font_size="24sp",
+            size_hint=(0.3, 0.09),
+            pos_hint={'x': 0.025, 'top': 0.39}
+        )
+        self.one_btn.bind(on_press=self.elevated)
+        self.two_btn = Button(
+            text="2",
+            font_size="24sp",
+            size_hint=(0.3, 0.09),
+            pos_hint={'x': 0.35, 'top': 0.39}
+        )
+        self.two_btn.bind(on_press=self.elevated)
+        self.three_btn = Button(
+            text="3",
+            font_size="24sp",
+            size_hint=(0.3, 0.09),
+            pos_hint={'x': 0.675, 'top': 0.39}
+        )
+        self.three_btn.bind(on_press=self.elevated)
+        self.four_btn = Button(
+            text="4",
+            font_size="24sp",
+            size_hint=(0.3, 0.09),
+            pos_hint={'x': 0.025, 'top': 0.29} 
+        )
+        self.four_btn.bind(on_press=self.elevated)
+        self.five_btn = Button(
+            text="5",
+            font_size="24sp",
+            size_hint=(0.3, 0.09),
+            pos_hint={'x': 0.35, 'top': 0.29}
+        )
+        self.five_btn.bind(on_press=self.elevated)
+        self.six_btn = Button(
+            text="6",
+            font_size="24sp",
+            size_hint=(0.3, 0.09),
+            pos_hint={'x': 0.675, 'top': 0.29}
+        )
+        self.six_btn.bind(on_press=self.elevated)
+        self.seven_btn = Button(
+            text="7",
+            font_size="24sp",
+            size_hint=(0.3, 0.09),
+            pos_hint={'x': 0.025, 'top': 0.19}
+        )
+        self.seven_btn.bind(on_press=self.elevated)
+        self.eight_btn = Button(
+            text="8",
+            font_size="24sp",
+            size_hint=(0.3, 0.09),
+            pos_hint={'x': 0.35, 'top': 0.19}
+        )
+        self.eight_btn.bind(on_press=self.elevated)
+        self.nine_btn = Button(
+            text="9",
+            font_size="24sp",
+            size_hint=(0.3, 0.09),
+            pos_hint={'x': 0.675, 'top': 0.19}
+        )
+        self.nine_btn.bind(on_press=self.elevated)
+        self.zero_btn = Button(
+            text="0",
+            font_size="24sp",
+            size_hint=(0.4, 0.08),
+            pos_hint={'center_x': 0.5, 'top': 0.09}
+        )
+        self.zero_btn.bind(on_press=self.elevated)
+        
+        self.layout.add_widget(self.one_btn)
+        self.layout.add_widget(self.two_btn)
+        self.layout.add_widget(self.three_btn)
+        self.layout.add_widget(self.four_btn)
+        self.layout.add_widget(self.five_btn)
+        self.layout.add_widget(self.six_btn)
+        self.layout.add_widget(self.seven_btn)
+        self.layout.add_widget(self.eight_btn)
+        self.layout.add_widget(self.nine_btn)
+        self.layout.add_widget(self.zero_btn)
+    
+    def elevated(self, instance):
+        self.layout.clear_widgets()
+        if self.password_hint == "How many openings did you pass by?":
+            self.correct_answer = 9
+        elif self.password_hint == "What was the button you pressed last time?":
+            self.correct_answer = self.pressed_btn_no
+        else:
+            self.correct_answer = 9 - self.pressed_btn_no
+        self.pressed_btn_no = int(instance.text)
+        self.elevated_label = Label(
+            text="",
+            font_size="20sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=self.brown,
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.elevated_label)
+        if self.correct_answer == self.pressed_btn_no:
+            self.elevated_text = f"""You press {self.pressed_btn_no}. The metal door opens just like an elevator door. You walk in, you don't see the usual keypad in the elevator, but the door closes automatically after a moment. The elevator starts moving, it feels like it's going downwards. The elevator stops, and its door starts to open, you see sunlight rushing in. The elevator doors opens to an opening leading outside."""
+            self.threshold = f"""You press {self.pressed_btn_no}. The metal door opens just like an elevator door. You walk in, you don't see the usual keypad in the elevator, but the door closes automatically after a moment."""
+            self.threshold2 = f"""You press {self.pressed_btn_no}. The metal door opens just like an elevator door. You walk in, you don't see the usual keypad in the elevator, but the door closes automatically after a moment. The elevator starts moving, it feels like it's going downwards."""
+            self.type_elevated = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.elevated_text, self.elevated_label), 0.05)
+            pause_time = len(self.threshold) * 0.05 - 0.65
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_elevated, 0.5, self.threshold), pause_time)
+            pause_time2 = len(self.threshold2) * 0.05 - 0.25
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_elevated, 4, self.threshold2), pause_time2)
+            schedule_time = len(self.elevated_text) * 0.05 + 3.75
+            self.exit_num = "3"
+            Clock.schedule_once(lambda dt: self.add_continue(dt, self.victory_scene), schedule_time)
+        else:
+            self.elevated_text = f"""You press {self.pressed_btn_no}. The metal door opens just like an elevator door. You walk in, you don't see the usual keypad in the elevator, but the door closes automatically after a moment. The elevator starts moving, it feels like it's going downwards. The elevator malfunctions, you can feel your legs lift up from the floor as the elevator plummets faster than you could catch your breath. The elevator crashes with you inside it. Your body feels numb, your vision is blurry, you can barely see the color red. Your mind fades away."""
+            self.threshold = f"""You press {self.pressed_btn_no}. The metal door opens just like an elevator door. You walk in, you don't see the usual keypad in the elevator, but the door closes automatically after a moment."""
+            self.threshold2 = f"""You press {self.pressed_btn_no}. The metal door opens just like an elevator door. You walk in, you don't see the usual keypad in the elevator, but the door closes automatically after a moment. The elevator starts moving, it feels like it's going downwards."""
+            self.threshold3 = f"""You press {self.pressed_btn_no}. The metal door opens just like an elevator door. You walk in, you don't see the usual keypad in the elevator, but the door closes automatically after a moment. The elevator starts moving, it feels like it's going downwards. The elevator malfunctions, you can feel your legs lift up from the floor as the elevator plummets faster than you could catch your breath."""
+            
+            self.type_elevated = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.elevated_text, self.elevated_label), 0.05)
+            pause_time = len(self.threshold) * 0.05 - 0.65
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_elevated, 0.5, self.threshold), pause_time)
+            pause_time2 = len(self.threshold2) * 0.05 - 0.25
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_elevated, 1, self.threshold2), pause_time2)
+            pause_time3 = len(self.threshold3) * 0.05 + 0.45
+            Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_elevated, 3, self.threshold3), pause_time3)
+            schedule_time = len(self.elevated_text) * 0.05 + 5.5
+            self.cod = "crashed out"
+            Clock.schedule_once(lambda dt: self.game_over(dt, self.stair), schedule_time)
+            self.op_no = 0
+            
+    def SE(self, instance):
+        self.layout.clear_widgets()
+        self.SE_text = """You take the opening to your left. A few steps in, a boulder blocks the opening. You see a light ahead of you, so you follow it."""
+        self.threshold = """You take the opening to your left. A few steps in, """
+        self.SE_label = Label(
+            text="",
+            font_size="27sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.SE_label)
+        self.current_skip_func = self.skip_SE
+        self.layout.add_widget(self.skip_button)
+        self.skip_button.bind(on_press=self.skip_SE)
+        
+        self.type_SE = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.SE_text, self.SE_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.1
+        self.pause_SE = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_SE, 0.5, self.threshold), pause_time)
+        if self.effects_on:
+            self.blockme = Clock.schedule_once(lambda dt: self.bouldercrash.play(), pause_time)
+        schedule_time = len(self.SE_text) * 0.05 + 0.35
+        self.protest = Clock.schedule_once(lambda dt: self.add_continue(dt, self.traitor), schedule_time)
+    
+    def skip_SE(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_SE.cancel()
+            try:
+                self.pause_SE.cancel()
+            except:
+                pass
+            if self.effects_on:
+                self.blockme.cancel()
+            self.protest.cancel()
+            Clock.schedule_once(lambda dt: self.add_continue(dt, self.traitor), 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+    
+    def traitor(self, instance):
         self.layout.clear_widgets()
     
     def trap(self, instance):
