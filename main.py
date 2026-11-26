@@ -25,105 +25,25 @@ from pathlib import Path
 class AdventureApp(App):
     def build(self):
         self.ambience = SoundLoader.load("assets/ambience.mp3")
-        if self.ambience:
-            self.ambience.volume = 0.75
-            self.ambience.loop = True
-            
         self.collapse = SoundLoader.load("assets/collapse.mp3")
-        if self.collapse:
-            self.collapse.volume = 1
-            self.collapse.loop = False
-
         self.crack = SoundLoader.load("assets/crack_sound.mp3")
-        if self.crack:
-            self.crack.volume = 0.8
-            self.crack.loop = True
-
         self.death_sound = SoundLoader.load("assets/Death.mp3")
-        if self.death_sound:
-            self.death_sound.volume = 1
-            self.death_sound.loop = False
-
         self.ambience_2 = SoundLoader.load("assets/eyes.mp3")
-        if self.ambience_2:
-            self.ambience_2.volume = 0.6
-            self.ambience_2.loop = True
-
         self.grapple = SoundLoader.load("assets/grapple.mp3")
-        if self.grapple:
-            self.grapple.volume = 1
-            self.grapple.loop = False
-
         self.grapple_back = SoundLoader.load("assets/grapple_back.mp3")        
-        if self.grapple_back:
-            self.grapple_back.volume = 1
-            self.grapple_back.loop = False
-            
         self.impact = SoundLoader.load("assets/hit_ground.wav")
-        if self.impact:
-            self.impact.volume = 1
-            self.impact.loop = False
-
         self.vic_ambience = SoundLoader.load("assets/victory_ambience.mp3")
-        if self.vic_ambience:
-            self.vic_ambience.volume = 1
-            self.vic_ambience.loop = True
-
         self.vic_ambience2 = SoundLoader.load("assets/victory_ambience_2.mp3")
-        if self.vic_ambience2:
-            self.vic_ambience2.volume = 0.75
-            self.vic_ambience2.loop = True
-
-        self.bat_sound = SoundLoader.load("assets/Bat_sounds.mp3")
-        if self.bat_sound:
-            self.bat_sound.volume = 1
-            self.bat_sound.loop = True
-            
-        self.bat_sound2 = SoundLoader.load("assets/bat_sounds2.mp3")
-        if self.bat_sound2:
-            self.bat_sound2.volume = 1
-            self.bat_sound2.loop = True
-            
+        self.bat_sound = SoundLoader.load("assets/Bat_sounds.mp3")            
+        self.bat_sound2 = SoundLoader.load("assets/bat_sounds2.mp3")            
         self.bat_sound3 = SoundLoader.load("assets/bat_sounds3.mp3")
-        if self.bat_sound3:
-            self.bat_sound3.volume = 1
-            self.bat_sound3.loop = True
-            
-        self.boulder_sound = SoundLoader.load("assets/boulder_rolling.mp3")
-        if self.boulder_sound:
-            self.boulder_sound.volume = 1
-            self.boulder_sound.loop = True
-        
-        self.bat_death = SoundLoader.load("assets/bat_eat.mp3")
-        if self.bat_death:
-            self.bat_death.volume = 1
-            self.bat_death.loop = False
-            
+        self.boulder_sound = SoundLoader.load("assets/boulder_rolling.mp3")        
+        self.bat_death = SoundLoader.load("assets/bat_eat.mp3")            
         self.crush = SoundLoader.load("assets/bone_break.mp3")
-        if self.crush:
-            self.crush.volume = 1
-            self.crush.loop = False
-            
-        self.shot = SoundLoader.load("assets/guntrap.mp3")
-        if self.shot:
-            self.shot.volume = 1
-            self.shot.loop = False
-            
-        self.slamdoor = SoundLoader.load("assets/slamdoor.mp3")
-        if self.slamdoor:
-            self.slamdoor.volume = 1
-            self.slamdoor.loop = False
-            
-        self.bouldercrash = SoundLoader.load("assets/Bouldercrash.mp3")
-        if self.bouldercrash:
-            self.bouldercrash.volume = 1
-            self.bouldercrash.loop = False
-            
-        self.click = SoundLoader.load("assets/click.mp3")
-        if self.click:
-            self.click.volume = 1
-            self.click.loop = False
-            
+        self.shot = SoundLoader.load("assets/guntrap.mp3")            
+        self.slamdoor = SoundLoader.load("assets/slamdoor.mp3")           
+        self.bouldercrash = SoundLoader.load("assets/Bouldercrash.mp3")            
+        self.click = SoundLoader.load("assets/click.mp3")           
         self.headbutt = SoundLoader.load("assets/headbutt.mp3")
         self.elevator_open = SoundLoader.load("assets/elevator_open.mp3")
         self.elevator_close = SoundLoader.load("assets/elevator_close.mp3")
@@ -132,6 +52,8 @@ class AdventureApp(App):
         self.elevator_ride = SoundLoader.load("assets/elevator_victory.mp3")
         self.electrocuted = SoundLoader.load("assets/electrocution.mp3")
         self.elevator_crash = SoundLoader.load("assets/lift_crash.mp3")
+        self.oneshot = SoundLoader.load("assets/oneshot.mp3")
+        self.dead_electricity = SoundLoader.load("assets/electric_death.mp3")
             
         self.layout = FloatLayout()
         
@@ -143,6 +65,7 @@ class AdventureApp(App):
         self.bat_eaten = "eaten by bats"
         self.fall_death = "fell to doom"
         self.crush_death = "crushed to death"
+        self.electric_death = "electrocuted"
         self.spilled = False
         save_path = Path(self.user_data_dir) / "save.json"
         self.store = JsonStore(str(save_path))
@@ -268,7 +191,74 @@ class AdventureApp(App):
             self.electrocuted.loop = True
         if self.elevator_crash:
             self.elevator_crash.volume = 1
-            self.elevator_crash.loop = False    
+            self.elevator_crash.loop = False
+        if self.oneshot:
+            self.oneshot.volume = 1
+            self.oneshot.loop = False    
+        if self.dead_electricity:
+            self.dead_electricity.volume = 1
+            self.dead_electricity.loop = False
+        if self.click:
+            self.click.volume = 1
+            self.click.loop = False
+        if self.bouldercrash:
+            self.bouldercrash.volume = 1
+            self.bouldercrash.loop = False
+        if self.slamdoor:
+            self.slamdoor.volume = 1
+            self.slamdoor.loop = False
+        if self.shot:
+            self.shot.volume = 1
+            self.shot.loop = False
+        if self.crush:
+            self.crush.volume = 1
+            self.crush.loop = False
+        if self.bat_death:
+            self.bat_death.volume = 1
+            self.bat_death.loop = False
+        if self.boulder_sound:
+            self.boulder_sound.volume = 1
+            self.boulder_sound.loop = True
+        if self.bat_sound3:
+            self.bat_sound3.volume = 1
+            self.bat_sound3.loop = True
+        if self.bat_sound2:
+            self.bat_sound2.volume = 1
+            self.bat_sound2.loop = True
+        if self.bat_sound:
+            self.bat_sound.volume = 1
+            self.bat_sound.loop = True
+        if self.vic_ambience2:
+            self.vic_ambience2.volume = 0.75
+            self.vic_ambience2.loop = True
+        if self.vic_ambience:
+            self.vic_ambience.volume = 1
+            self.vic_ambience.loop = True
+        if self.impact:
+            self.impact.volume = 1
+            self.impact.loop = False
+        if self.grapple_back:
+            self.grapple_back.volume = 1
+            self.grapple_back.loop = False
+        if self.grapple:
+            self.grapple.volume = 1
+            self.grapple.loop = False
+        if self.ambience_2:
+            self.ambience_2.volume = 0.6
+            self.ambience_2.loop = True
+        if self.death_sound:
+            self.death_sound.volume = 1
+            self.death_sound.loop = False
+        if self.crack:
+            self.crack.volume = 0.8
+            self.crack.loop = True
+        if self.collapse:
+            self.collapse.volume = 1
+            self.collapse.loop = False
+        if self.ambience:
+            self.ambience.volume = 0.75
+            self.ambience.loop = True
+        #}
         
         self.skip_button.pos_hint = {'right': 1, 'center_y': 0.425}
         if self.store.exists("exits"):
@@ -397,7 +387,7 @@ class AdventureApp(App):
             pos_hint={'x': 0, 'top': 0.95},
             font_size="9sp"
         )
-        self.test_btn.bind(on_press=self.stair)
+        self.test_btn.bind(on_press=self.traitor)
         self.layout.add_widget(self.test_btn)
         #)
                 
@@ -3451,10 +3441,12 @@ class AdventureApp(App):
         self.current_skip_func = self.skip_traitor
         self.skip_button.bind(on_press=self.skip_traitor)
         
+        if self.ambience_on:
+            self.ambience.stop()
         self.type_traitor = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.traitor_text, self.traitor_label), 0.05)
         pause_time = len(self.threshold) * 0.05 - 0.2
         self.pause_traitor = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_traitor, 1, self.threshold), pause_time)
-        pause_time2 = len(self.threshold2) * 0.05 + 0.5
+        pause_time2 = len(self.threshold2) * 0.05
         self.pause_traitor2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_traitor, 0.5, self.threshold2), pause_time2)
         schedule_time = len(self.traitor_text) * 0.05 + 1
         self.memory_flash = Clock.schedule_once(lambda dt: self.add_continue(dt, self.protestor), schedule_time)
@@ -3504,9 +3496,9 @@ class AdventureApp(App):
         self.skip_button.bind(on_press=self.skip_protestor)
         
         self.type_protesting = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.protestor_text, self.protestor_label), 0.05)
-        pause_time = len(self.threshold) * 0.05 - 0.2
+        pause_time = len(self.threshold) * 0.05 - 0.5
         self.pause_protesting = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_protesting, 0.5, self.threshold), pause_time)
-        pause_time2 = len(self.threshold2) * 0.05 + 0.1
+        pause_time2 = len(self.threshold2) * 0.05 - 0.3
         self.pause_protesting2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_protesting, 0.5, self.threshold2), pause_time2)
         schedule_time = len(self.protestor_text) * 0.05 + 0.6
         self.protest_opts = Clock.schedule_once(self.protest_options, schedule_time)
@@ -3518,7 +3510,7 @@ class AdventureApp(App):
             self.pause_protesting.cancel()
             self.pause_protesting2.cancel()
             self.protest_opts.cancel()
-            Clock.schedule_once(lambda dt: self.add_continue(dt, self.protest_options), 0)
+            Clock.schedule_once(self.protest_options, 0)
             self.char_index = 0
             try:
                 self.resumption.cancel()
@@ -3547,7 +3539,7 @@ class AdventureApp(App):
             pos_hint={'center_x': 0.5, 'top': 0.27},
             background_color=self.brown
         )
-        self.insist_btn.bind(on_press=self.electrocuted)
+        self.insist_btn.bind(on_press=self.shocked)
         self.idc_btn = Button(
             text="I don't care anymore",
             font_size="24sp",
@@ -3555,14 +3547,179 @@ class AdventureApp(App):
             pos_hint={'center_x': 0.5, 'top': 0.14},
             background_color=self.brown
         )
+        self.idc_btn.bind(on_press=self.shocked)
         self.layout.add_widget(self.regret_btn)
         self.layout.add_widget(self.insist_btn)
         self.layout.add_widget(self.idc_btn)
     
-    def electrocuted(self, instance):
+    def shocked(self, instance):
         self.layout.clear_widgets()
+        self.shocked_text = f"""You pull the "{instance.text}" lever. The moment it reaches the other side, a surge of high-voltage electricity zaps your whole body. You can feel your body shaking and getting numb, but you can't get your hand off of it. The electric surge slams you onto the wall, but your mind has already faded away."""
+        self.threshold = f"""You pull the "{instance.text}" lever. The moment it reaches the other side, """
+        self.threshold2 = f"""You pull the "{instance.text}" lever. The moment it reaches the other side, a surge of high-voltage electricity zaps your whole body. You can feel your body shaking and getting numb, but you can't get your hand off of it."""
+        self.shocked_label = Label(
+            text="",
+            font_size="22sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        if self.images_on:
+            self.layout.add_widget(self.traitor_image)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.shocked_label)
+        
+        self.type_shock = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.shocked_text, self.shocked_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.35
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_shock, 0.5, self.threshold), pause_time)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.electrocuted.play(), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 - 0.2
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_shock, 0.5, self.threshold2), pause_time2)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.electrocuted.stop(), pause_time2)
+            Clock.schedule_once(lambda dt: self.headbutt.play(), pause_time2 + 0.1)
+        schedule_time = len(self.shocked_text) * 0.05 + 1.5
+        self.cod = "electrocuted"
+        Clock.schedule_once(lambda dt: self.game_over(dt, self.protestor), schedule_time)
         
     def simulate(self, instance):
+        self.layout.clear_widgets()
+        self.simulate_text = f"""You pull the "{instance.text}" lever. The moment it reaches the other side, the wall to your left crumbles, revealing a small opening. There is light coming from the other side of the opening, so you decide to follow it."""
+        self.threshold = f"""You pull the "{instance.text}" lever. The moment it reaches the other side, """
+        self.simulate_label = Label(
+            text="",
+            font_size="22sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=self.brown,
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.simulate_label)
+        
+        self.type_simulate = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.simulate_text, self.simulate_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.4
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_simulate, 0.5, self.threshold), pause_time)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.impact.play(), pause_time)
+        schedule_time = len(self.simulate_text) * 0.05
+        Clock.schedule_once(lambda dt: self.add_continue(dt, self.simulation), schedule_time)
+    
+    def simulation(self, instance):
+        self.layout.clear_widgets()
+        self.simulation_text = """You reach the light, it's another room. In this room you see a table with a laptop on it directly ahead of you. The laptop's screen shows, "press Enter to continue". To your left is a wooden door with a metal handle. There is nothing else, except a ceiling lamp, in this room. What do you do?"""
+        self.simulation_label = Label(
+            text="",
+            font_size="27sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            color=self.brown,
+            bold=True
+        )
+        self.simulation_image = Image(
+            source="assets/laptop_puzzle.png",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+        )
+        if self.images_on:
+            self.layout.add_widget(self.simulation_image)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.simulation_label)
+        self.layout.add_widget(self.skip_button)
+        self.skip_button.bind(on_press=self.skip_simulation)
+        self.current_skip_func = self.skip_simulation
+        
+        self.type_simulation = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.simulation_text, self.simulation_label), 0.05)
+        schedule_time = len(self.simulation_text) * 0.05
+        self.laptop = Clock.schedule_once(self.keyboard, schedule_time)
+    
+    def skip_simulation(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_simulation.cancel()
+            self.laptop.cancel()
+            Clock.schedule_once(self.keyboard, 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+    
+    def keyboard(self, dt):
+        self.ENTER = Button(
+            text="Press Enter on the laptop's keyboard",
+            font_size="24sp",
+            size_hint=(1, 0.2),
+            pos_hint={'center_x': 0.5, 'y': 0},
+            background_color=self.brown
+        )
+        self.ENTER.bind(on_press=self.started_simulation)
+        self.open_door = Button(
+            text="Go through the door.",
+            font_size="24sp",
+            size_hint=(1, 0.2),
+            pos_hint={'center_x': 0.5, 'top': 0.4},
+            background_color=self.brown
+        )
+        self.open_door.bind(on_press=self.electric_door)
+        
+        self.layout.add_widget(self.ENTER)
+        self.layout.add_widget(self.open_door)
+    
+    def electric_door(self, instance):
+        self.layout.clear_widgets()
+        self.electric_door_text = """You put your hand on the door's handle. A surge of high-voltage electricity zaps your whole body. You can feel your body going numb, but your hand won't let go. The electriciy slams you on the floor, but your mind has already faded away."""
+        self.threshold = """You put your hand on the door's handle."""
+        self.threshold2 = """You put your hand on the door's handle. A surge of high-voltage electricity zaps your whole body. You can feel your body going numb, but your hand won't let go."""
+        self.electric_door_label = Label(
+            text="",
+            font_size="27sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True,
+            color=self.brown
+        )
+        if self.images_on:
+            self.layout.add_widget(self.simulation_image)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.elecric_door_label)
+        
+        self.type_electric_door = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.electric_door_text, self.electric_door_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.1
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_electric_door, 0.5, self.threshold), pause_time)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.electrocuted.play(), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 + 0.2
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_electric_door, 0.5, self.threshold2), pause_time2)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.electrocuted.stop(), pause_time2)
+            Clock.schedule_once(lambda dt: self.headbutt.play(), pause_time2 + 0.1)
+        schedule_time = len(self.electric_door_text) * 0.05 + 1.5
+        Clock.schedule_once(lambda dt: self.game_over(dt, self.simulation), schedule_time)
+    
+    def started_simulation(self, instance):
         self.layout.clear_widgets()
     
     def trap(self, instance):
@@ -4053,6 +4210,8 @@ class AdventureApp(App):
                 self.bat_death.play()
             elif self.cod == self.crush_death:
                 self.crush.play()
+            elif self.cod == self.electric_death:
+                self.dead_electricity.play() 
         if self.ambience_on == True:
             self.ambience.stop() 
         self.died_label.opacity = 0
