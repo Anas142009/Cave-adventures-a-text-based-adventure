@@ -4,6 +4,7 @@ title = Cave Adventures
 package.name = caveadventure
 package.domain = org.example
 source.dir = .
+icon.filename = %(source.dir)s/assets/ico.png
 source.exclude_dirs = formulas
 source.include_exts = py,png,jpg,kv,atlas,wav,mp3,jpeg,TTF
 version = 0.1.0
