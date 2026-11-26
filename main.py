@@ -125,6 +125,13 @@ class AdventureApp(App):
             self.click.loop = False
             
         self.headbutt = SoundLoader.load("assets/headbutt.mp3")
+        self.elevator_open = SoundLoader.load("assets/elevator_open.mp3")
+        self.elevator_close = SoundLoader.load("assets/elevator_close.mp3")
+        self.alarm = SoundLoader.load("assets/alarm.mp3")
+        self.lift_fall = SoundLoader.load("assets/lift_fall.mp3")
+        self.elevator_ride = SoundLoader.load("assets/elevator_victory.mp3")
+        self.electrocuted = SoundLoader.load("assets/electrocution.mp3")
+        self.elevator_crash = SoundLoader.load("assets/lift_crash.mp3")
             
         self.layout = FloatLayout()
         
@@ -241,6 +248,28 @@ class AdventureApp(App):
         if self.headbutt:
             self.headbutt.volume = 1
             self.headbutt.loop = False
+        if self.elevator_open:
+            self.elevator_open.volume = 1
+            self.elevator_open.loop = False
+        if self.elevator_close:
+            self.elevator_close.volume = 1
+            self.elevator_close.loop = False
+        if self.alarm:
+            self.alarm.volume = 1
+            self.alarm.loop = False
+        if self.lift_fall:
+            self.lift_fall.volume = 1
+            self.lift_fall.loop = False
+        if self.elevator_ride:
+            self.elevator_ride.volume = 1
+            self.elevator_ride.loop = False
+        if self.electrocuted:
+            self.electrocuted.volume = 1
+            self.electrocuted.loop = True
+        if self.elevator_crash:
+            self.elevator_crash.volume = 1
+            self.elevator_crash.loop = False    
+        
         self.skip_button.pos_hint = {'right': 1, 'center_y': 0.425}
         if self.store.exists("exits"):
             self.exits = self.store.get("exits")
@@ -2458,7 +2487,8 @@ class AdventureApp(App):
         self.layout.add_widget(self.text_background)
         self.layout.add_widget(self.archive_label)
         self.layout.add_widget(self.main_menu_button)
-        self.layout.add_widget(self.repuzzle)
+        if not self.no_puzzle:
+            self.layout.add_widget(self.repuzzle)
         self.layout.add_widget(self.read_btn)
     
     def story(self, instance):
@@ -2498,7 +2528,7 @@ class AdventureApp(App):
         )
         if self.page_no == 0:
             self.prev_btn.text = "Back"
-            self.prev_btn.bind(on_press=self.Rarchive)
+            self.prev_btn.bind(on_press=self.archive)
         else:
             self.prev_btn.bind(on_press=self.prev_page)
         
@@ -2508,13 +2538,17 @@ class AdventureApp(App):
         self.layout.add_widget(self.prev_btn)
            
     def Rarchive(self, instance):
+        if instance == self.archive_btn:
+            self.no_puzzle = True
+        else:
+            self.no_puzzle = False
         Clock.schedule_once(self.archive, 0)
     
     def next_page(self, instance):
         self.page_no += 1
         if self.page_no > 1:
             try:
-                self.prev_btn.unbind(on_press=self.Rarchive)
+                self.prev_btn.unbind(on_press=self.archive)
             except:
                 pass
             self.prev_btn.bind(on_press=self.prev_page)
@@ -2526,7 +2560,7 @@ class AdventureApp(App):
         self.page_no -= 1
         if self.page_no == 1:
             self.prev_btn.unbind(on_press=self.prev_page)
-            self.prev_btn.bind(on_press=self.Rarchive)   
+            self.prev_btn.bind(on_press=self.archive)   
             self.prev_btn.text = "Back"
         Clock.schedule_once(self.loadstory, 0)
     
@@ -2543,7 +2577,7 @@ class AdventureApp(App):
         elif self.page_no == 3:
             self.story_label.text = "The HRIT project, is an illegal project where humans are put through REAL life-or-death situations without their consent. The *cave* you were put in is one of the many sites of the HRIT project. The HRIT project's targets are usually not random. After your protest against the simulation idea, the HRRO was scared of you doing research into them since you have a friend working in the government. The HRRO put you through this test for two major reasons. The first, is to simply remove a threat. In other words, to kill you. The second reason is, even if you do survive, they had needed a test subject for this site anyway."
             try:
-                self.next_btn.unbind(on_press=self.Rarchive)
+                self.next_btn.unbind(on_press=self.archive)
             except:
                 pass
             self.next_btn.text = "next page -->"
@@ -2565,7 +2599,7 @@ class AdventureApp(App):
                 self.layout.add_widget(self.oii_label)
             self.next_btn.text = "done reading"
             self.next_btn.unbind(on_press=self.next_page)
-            self.next_btn.bind(on_press=self.Rarchive)
+            self.next_btn.bind(on_press=self.archive)
     
     def ran(self, instance):
         self.qte.cancel()
@@ -3010,6 +3044,15 @@ class AdventureApp(App):
             halign='left',
             valign='top'
         )
+        self.down_image = Image(
+            source="assets/spiral_down.png",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+        )
+        if self.images_on:
+            self.layout.add_widget(self.down_image)
         self.layout.add_widget(self.text_background)
         self.layout.add_widget(self.down_label)
         self.current_skip_func = self.skip_down
@@ -3276,14 +3319,22 @@ class AdventureApp(App):
         self.layout.add_widget(self.text_background)
         self.layout.add_widget(self.elevated_label)
         if self.correct_answer == self.pressed_btn_no:
-            self.elevated_text = f"""You press {self.pressed_btn_no}. The metal door opens just like an elevator door. You walk in, you don't see the usual keypad in the elevator, but the door closes automatically after a moment. The elevator starts moving, it feels like it's going downwards. The elevator stops, and its door starts to open, you see sunlight rushing in. The elevator doors opens to an opening leading outside."""
+            self.elevated_text = f"""You press {self.pressed_btn_no}. The metal door opens just like an elevator door. You walk in, you don't see the usual keypad in the elevator, but the door closes automatically after a moment. The elevator starts moving, it feels like it's going downwards. The elevator stops, and its door starts to open, you see sunlight rushing in. The elevator door opens to an opening leading outside."""
             self.threshold = f"""You press {self.pressed_btn_no}. The metal door opens just like an elevator door. You walk in, you don't see the usual keypad in the elevator, but the door closes automatically after a moment."""
             self.threshold2 = f"""You press {self.pressed_btn_no}. The metal door opens just like an elevator door. You walk in, you don't see the usual keypad in the elevator, but the door closes automatically after a moment. The elevator starts moving, it feels like it's going downwards."""
             self.type_elevated = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.elevated_text, self.elevated_label), 0.05)
+            open_time = len(f"You press {self.pressed_btn_no}") * 0.05
+            if self.effects_on:
+                Clock.schedule_once(lambda dt: self.elevator_open.play(), open_time)
             pause_time = len(self.threshold) * 0.05 - 0.65
             Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_elevated, 0.5, self.threshold), pause_time)
+            if self.effects_on:
+                Clock.schedule_once(lambda dt: self.elevator_ride.play(), pause_time - 2)
             pause_time2 = len(self.threshold2) * 0.05 - 0.25
             Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_elevated, 4, self.threshold2), pause_time2)
+            if self.effects_on:
+                Clock.schedule_once(lambda dt: self.elevator_ride.stop(), pause_time2 + 4)
+                Clock.schedule_once(lambda dt: self.elevator_open.play(), pause_time2 + 4.1)
             schedule_time = len(self.elevated_text) * 0.05 + 3.75
             self.exit_num = "3"
             Clock.schedule_once(lambda dt: self.add_continue(dt, self.victory_scene), schedule_time)
@@ -3294,13 +3345,24 @@ class AdventureApp(App):
             self.threshold3 = f"""You press {self.pressed_btn_no}. The metal door opens just like an elevator door. You walk in, you don't see the usual keypad in the elevator, but the door closes automatically after a moment. The elevator starts moving, it feels like it's going downwards. The elevator malfunctions, you can feel your legs lift up from the floor as the elevator plummets faster than you could catch your breath."""
             
             self.type_elevated = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.elevated_text, self.elevated_label), 0.05)
+            open_time = len(f"You press {self.pressed_btn_no}") * 0.05
+            if self.effects_on:
+                Clock.schedule_once(lambda dt: self.elevator_open.play(), open_time)
             pause_time = len(self.threshold) * 0.05 - 0.65
             Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_elevated, 0.5, self.threshold), pause_time)
+            if self.effects_on:
+                Clock.schedule_once(lambda dt: self.elevator_ride.play(), pause_time - 2)
             pause_time2 = len(self.threshold2) * 0.05 - 0.25
             Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_elevated, 1, self.threshold2), pause_time2)
+            if self.effects_on:
+                Clock.schedule_once(lambda dt: self.elevator_ride.stop(), pause_time2 + 1)
+                Clock.schedule_once(lambda dt: self.lift_fall.play(), pause_time2 + 1)
             pause_time3 = len(self.threshold3) * 0.05 + 0.45
             Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_elevated, 3, self.threshold3), pause_time3)
-            schedule_time = len(self.elevated_text) * 0.05 + 5.5
+            if self.effects_on:
+                Clock.schedule_once(lambda dt: self.lift_fall.stop(), pause_time3 + 2.9)
+                Clock.schedule_once(lambda dt: self.elevator_crash.play(), pause_time3 + 2.9)
+            schedule_time = len(self.elevated_text) * 0.05 + 6
             self.cod = "crashed out"
             Clock.schedule_once(lambda dt: self.game_over(dt, self.stair), schedule_time)
             self.op_no = 0
@@ -3359,6 +3421,148 @@ class AdventureApp(App):
             self.layout.remove_widget(self.skip_button)
     
     def traitor(self, instance):
+        self.layout.clear_widgets()
+        self.traitor_text = """You reach the light, your mind is blown, you are too shocked to even show emotion. "What am I doing here?" is the first question that comes to your mind, and you're not wrong. Directly in front of you is a photo of yourself. You walk forward to it, your leg bumps into one of three completely metal levers. As you take a closer look at the image, it appears there is writing engraved on the frame, "Protestor" is what it says."""
+        self.threshold = """You reach the light, your mind is blown, you are too shocked to even show emotion."""
+        self.threshold2 = """You reach the light, your mind is blown, you are too shocked to even show emotion. "What am I doing here?" is the first question that comes to your mind, and you're not wrong. Directly in front of you is a photo of yourself. You walk forward to it, your leg bumps into one of three completely metal levers."""
+        self.traitor_label = Label(
+            text="",
+            font_size="20sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.traitor_image = Image(
+            source="assets/lever_puzzle.png",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+        )
+        if self.images_on:
+            self.layout.add_widget(self.traitor_image)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.traitor_label)
+        self.layout.add_widget(self.skip_button)
+        self.current_skip_func = self.skip_traitor
+        self.skip_button.bind(on_press=self.skip_traitor)
+        
+        self.type_traitor = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.traitor_text, self.traitor_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.2
+        self.pause_traitor = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_traitor, 1, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 + 0.5
+        self.pause_traitor2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_traitor, 0.5, self.threshold2), pause_time2)
+        schedule_time = len(self.traitor_text) * 0.05 + 1
+        self.memory_flash = Clock.schedule_once(lambda dt: self.add_continue(dt, self.protestor), schedule_time)
+        
+    def skip_traitor(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_traitor.cancel()
+            self.pause_traitor.cancel()
+            self.pause_traitor2.cancel()
+            self.memory_flash.cancel()
+            Clock.schedule_once(lambda dt: self.add_continue(dt, self.protestor), 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+    
+    def protestor(self, instance):
+        self.layout.clear_widgets()
+        self.protestor_text = """That word causes a memory flash. You can vaguely remember protesting against a certain idea, but you can't remember what or why. You take a closer look at the levers, all of them are pulled towards the opening you entered, so if you move them you'll' be pulling them towards your photo. It appears that each lever has a note next to it. The notes read, "I regret what I've done.", "I was right.", and "I don't care anymore." Which lever do you pull?"""
+        self.threshold = """That word causes a memory flash. You can vaguely remember protesting against a certain idea, but you can't remember what or why."""
+        self.threshold2 = """That word causes a memory flash. You can vaguely remember protesting against a certain idea, but you can't remember what or why. You take a closer look at the levers, all of them are pulled towards the opening you entered, so if you move them you'll' be pulling them towards your photo."""
+        self.protestor_label = Label(
+            text="",
+            font_size="20sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        if self.images_on:
+            self.layout.add_widget(self.traitor_image)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.protestor_label)
+        self.layout.add_widget(self.skip_button)
+        self.current_skip_func = self.skip_protestor
+        self.skip_button.bind(on_press=self.skip_protestor)
+        
+        self.type_protesting = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.protestor_text, self.protestor_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.2
+        self.pause_protesting = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_protesting, 0.5, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 + 0.1
+        self.pause_protesting2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_protesting, 0.5, self.threshold2), pause_time2)
+        schedule_time = len(self.protestor_text) * 0.05 + 0.6
+        self.protest_opts = Clock.schedule_once(self.protest_options, schedule_time)
+    
+    def skip_protestor(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_protesting.cancel()
+            self.pause_protesting.cancel()
+            self.pause_protesting2.cancel()
+            self.protest_opts.cancel()
+            Clock.schedule_once(lambda dt: self.add_continue(dt, self.protest_options), 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+               
+    def protest_options(self, dt):
+        self.regret_btn = Button(
+            text="I regret what I've done",
+            font_size="24sp",
+            size_hint=(1, 0.13),
+            pos_hint={'center_x': 0.5, 'top': 0.4},
+            background_color=self.brown
+        )
+        self.regret_btn.bind(on_press=self.simulate)
+        self.insist_btn = Button(
+            text="I was right",
+            font_size="24sp",
+            size_hint=(1, 0.13),
+            pos_hint={'center_x': 0.5, 'top': 0.27},
+            background_color=self.brown
+        )
+        self.insist_btn.bind(on_press=self.electrocuted)
+        self.idc_btn = Button(
+            text="I don't care anymore",
+            font_size="24sp",
+            size_hint=(1, 0.13),
+            pos_hint={'center_x': 0.5, 'top': 0.14},
+            background_color=self.brown
+        )
+        self.layout.add_widget(self.regret_btn)
+        self.layout.add_widget(self.insist_btn)
+        self.layout.add_widget(self.idc_btn)
+    
+    def electrocuted(self, instance):
+        self.layout.clear_widgets()
+        
+    def simulate(self, instance):
         self.layout.clear_widgets()
     
     def trap(self, instance):
