@@ -168,6 +168,7 @@ class AdventureApp(App):
         self.upped = False
         self.op_no = 0
         self.returned = False
+        self.not_ambience = False
         if self.headbutt:
             self.headbutt.volume = 1
             self.headbutt.loop = False
@@ -3443,6 +3444,7 @@ class AdventureApp(App):
         
         if self.ambience_on:
             self.ambience.stop()
+            self.not_ambience = True
         self.type_traitor = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.traitor_text, self.traitor_label), 0.05)
         pause_time = len(self.threshold) * 0.05 - 0.2
         self.pause_traitor = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_traitor, 1, self.threshold), pause_time)
@@ -3704,22 +3706,199 @@ class AdventureApp(App):
         if self.images_on:
             self.layout.add_widget(self.simulation_image)
         self.layout.add_widget(self.text_background)
-        self.layout.add_widget(self.elecric_door_label)
+        self.layout.add_widget(self.electric_door_label)
         
         self.type_electric_door = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.electric_door_text, self.electric_door_label), 0.05)
         pause_time = len(self.threshold) * 0.05 - 0.1
         Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_electric_door, 0.5, self.threshold), pause_time)
         if self.effects_on:
             Clock.schedule_once(lambda dt: self.electrocuted.play(), pause_time)
-        pause_time2 = len(self.threshold2) * 0.05 + 0.2
+        pause_time2 = len(self.threshold2) * 0.05
         Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_electric_door, 0.5, self.threshold2), pause_time2)
         if self.effects_on:
             Clock.schedule_once(lambda dt: self.electrocuted.stop(), pause_time2)
             Clock.schedule_once(lambda dt: self.headbutt.play(), pause_time2 + 0.1)
         schedule_time = len(self.electric_door_text) * 0.05 + 1.5
+        self.cod = "electrocuted"
         Clock.schedule_once(lambda dt: self.game_over(dt, self.simulation), schedule_time)
     
     def started_simulation(self, instance):
+        self.layout.clear_widgets()
+        self.begun_text = """You press Enter on the laptop's keyboard. The screen changes and now displays, "The simulation has begun."' The word 'simulation' strikes you like lightining. You remember the thing you protested against was a life-risking simulation of some kind. Your head hurts, it feels like it's being drilled. Your thought is interrupted with a clicking sound coming from the door. You go towards the door."""
+        self.threshold = """You press Enter on the laptop's keyboard. The screen changes and now displays, "The simulation has begun."' The word 'simulation' strikes you like lightining."""
+        self.threshold2 = """You press Enter on the laptop's keyboard. The screen changes and now displays, "The simulation has begun."' The word 'simulation' strikes you like lightining. You remember the thing you protested against was a life-risking simulation of some kind. Your head hurts, it feels like it's being drilled."""
+        self.begun_label = Label(
+            text="",
+            font_size="22sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        if self.images_on:
+            self.layout.add_widget(self.simulation_image)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.begun_label)
+        self.layout.add_widget(self.skip_button)
+        self.current_skip_func = self.skip_beginning
+        self.skip_button.bind(on_press=self.skip_beginning)
+        
+        self.type_begun = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.begun_text, self.begun_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.6
+        self.pause_begun = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_begun, 0.5, self.threshold), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 - 0.2
+        self.pause_begun2 = Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_begun, 0.5, self.threshold2), pause_time2)
+        if self.effects_on:
+            self.turn_off = Clock.schedule_once(lambda dt: self.click.play(), pause_time2)
+        schedule_time = len(self.begun_text) * 0.05 + 0.5
+        self.lastSE = Clock.schedule_once(lambda dt: self.add_continue(dt, self.two_doors), schedule_time) 
+    
+    def skip_beginning(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_begun.cancel()
+            self.pause_begun.cancel()
+            self.pause_begun2.cancel()
+            self.lastSE.cancel()
+            Clock.schedule_once(lambda dt: self.add_continue(dt, self.two_doors), 0)
+            if self.effects_on:
+                self.turn_off.cancel()
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+    
+    def two_doors(self, instance):
+        self.layout.clear_widgets()
+        self.two_doors_text = """You open the door and walk through. You find yet another room; However, the room this time is mostly empty. The only thing you see are two doors, one to the left and one to the right. In between the two doors is a big sign that reads, "Do you think you'll survive?" You notice two small signs above each door, one reading "Yes" and the other reading "No". Do you think you'll survive?"""
+        self.two_doors_label = Label(
+            text="",
+            font_size="22sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.two_doors_image = Image(
+            source="assets/two_door.png",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+        )
+        if self.images_on:
+            self.layout.add_widget(self.two_doors_image)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.two_doors_label)
+        self.layout.add_widget(self.skip_button)
+        self.current_skip_func = self.skip_two_doors
+        self.skip_button.bind(on_press=self.skip_two_doors)
+        
+        self.type_two_doors = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.two_doors_text, self.two_doors_label), 0.05)
+        schedule_time = len(self.two_doors_text) * 0.05 -  0.2
+        self.survival_chance = Clock.schedule_once(self.potentialSE, schedule_time)
+                               
+    def skip_two_doors(self, instance):
+        if self.char_index < len(self.targeted):
+            self.typed_label.text = self.targeted
+            self.type_two_doors.cancel()
+            self.survival_chance.cancel()
+            Clock.schedule_once(self.potentialSE, 0)
+            self.char_index = 0
+            try:
+                self.resumption.cancel()
+            except:
+                pass
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+        else:
+            self.char_index = 0
+            self.skip_button.unbind(on_press=self.current_skip_func)
+            self.layout.remove_widget(self.skip_button)
+       
+    def potentialSE(self, dt):
+        self.I_do = Button(
+            text="Yes",
+            font_size="24sp",
+            size_hint=(0.45, 0.4),
+            pos_hint={'x': 0, 'center_y': 0.2},
+            background_color=self.brown
+        )
+        self.I_do.bind(on_press=self.failed)
+        self.I_dont = Button(
+            text="No",
+            font_size="24sp",
+            size_hint=(0.45, 0.4),
+            pos_hint={'right': 1, 'center_y': 0.2},
+            background_color=self.brown
+        )
+        self.I_dont.bind(on_press=self.failed)
+        self.idk = Button(
+            text="I don't know",
+            font_size="24sp",
+            size_hint=(0.3, 0.4),
+            pos_hint={'x': 0.3, 'center_y': 0.2},
+            background_color=self.brown
+        )
+        self.idk.bind(on_press=self.secret_ending)
+        
+        if "1" in self.found_exits and "2" in self.found_exits and "3" in self.found_exits:
+            self.I_do.size_hint = (0.3, 0.4)
+            self.I_dont.size_hint = (0.3, 0.4)
+            self.layout.add_widget(self.idk)
+        self.layout.add_widget(self.I_do)
+        self.layout.add_widget(self.I_dont)
+    
+    def failed(self, instance):
+        self.layout.clear_widgets()
+        if instance.text == "Yes":
+            self.answer = "Think again."
+        else:
+            self.answer = "Correct."
+        self.failed_text = f"""You walk toward the door with the "{instance.text}" sign. You squeeze the handle downward and open it. Before you get a chance to react, a singular shot square in your forehead. With the last bit of your blurry vision, your eyes scroll over a sign that reads, "{self.answer}" that is stuck to the ceiling. You hit the ground, your mind fades away."""
+        self.threshold = f"""You walk toward the door with the "{instance.text}" sign. You squeeze the handle downward and open it. Before you get a chance to react,"""
+        self.threshold2 = f"""You walk toward the door with the "{instance.text}" sign. You squeeze the handle downward and open it. Before you get a chance to react, a singular shot square in your forehead. With the last bit of your blurry vision, your eyes scroll over a sign that reads, "{self.answer}" that is stuck to the ceiling."""
+        self.failed_label = Label(
+            text="",
+            font_size="20sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=self.brown,
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.failed_label)
+        
+        self.type_failed = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.failed_text, self.failed_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 0.4
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_failed, 0.5, self.threshold), pause_time)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.oneshot.play(), pause_time)
+        pause_time2 = len(self.threshold2) * 0.05 - 0.15
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_failed, 3, self.threshold2), pause_time2)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.collapse.play(), pause_time2 + 3)
+        schedule_time = len(self.failed_text) * 0.05 + 4
+        self.cod = "headshot"
+        Clock.schedule_once(lambda dt: self.game_over(dt, self.two_doors), schedule_time)
+        
+    def secret_ending(self, instance):
         self.layout.clear_widgets()
     
     def trap(self, instance):
@@ -4201,7 +4380,7 @@ class AdventureApp(App):
             background_color=self.brown
         )
         self.retry_btn.bind(on_press=previous_screen)
-        if self.ambience_on == True:
+        if self.ambience_on == True and not self.not_ambience:
             self.retry_btn.bind(on_press=lambda instance: self.ambience.play())
         if self.effects_on == True:
             if self.cod == self.fall_death:
