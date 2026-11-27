@@ -344,7 +344,17 @@ class AdventureApp(App):
             halign='center',
             valign='center'
         )
-        self.archive_btn.bind(on_press=self.Rarchive)
+        
+        self.version_label = Label(
+            text="v.1.5",
+            font_size="22sp",
+            size_hint=(0.2, 0.1),
+            pos_hint={'right': 0.975, 'top': 0.975},
+            text_size=(Window.width * 0.2, Window.height * 0.1),
+            halign='right',
+            valign='top',
+            color=[1, 0.5, 0.1, 1]
+        )
         
         self.secret_btn = Button(
             text="secret code",
@@ -377,20 +387,11 @@ class AdventureApp(App):
             self.layout.add_widget(self.secret_stroke)
             self.layout.add_widget(self.secret_btn) 
         self.layout.add_widget(self.title_background)
+        self.layout.add_widget(self.version_label)
         self.layout.add_widget(self.option_button)
         self.layout.add_widget(self.quit_button)
         self.layout.add_widget(self.start_button)
         self.layout.add_widget(self.gamename)
-        #REMOVE AFTER TESTING:(
-        self.test_btn = Button(
-            text="test",
-            size_hint=(0.1, 0.05),
-            pos_hint={'x': 0, 'top': 0.95},
-            font_size="9sp"
-        )
-        self.test_btn.bind(on_press=self.traitor)
-        self.layout.add_widget(self.test_btn)
-        #)
                 
         if hasattr(self, "hasaccess") and self.hasaccess:
             self.layout.add_widget(self.archive_btn)
@@ -420,6 +421,7 @@ class AdventureApp(App):
         
         self.layout.add_widget(self.secret_code)
         self.layout.add_widget(self.back_btn)
+        self.layout.add_widget(self.version_label)
         self.spilled = True
     
     def start_game(self, instance):
@@ -3849,7 +3851,7 @@ class AdventureApp(App):
         self.idk = Button(
             text="I don't know",
             font_size="24sp",
-            size_hint=(0.3, 0.4),
+            size_hint=(0.4, 0.4),
             pos_hint={'x': 0.3, 'center_y': 0.2},
             background_color=self.brown
         )
@@ -3900,6 +3902,146 @@ class AdventureApp(App):
         
     def secret_ending(self, instance):
         self.layout.clear_widgets()
+        self.secret_ending_text = """ "I DON'T KNOW" You shout so loud you make your own ears hurt. "I don't know if I'll survive, I don't know what this place is, I don't know anything anymore." You keep shouting, just slightly quieter. "The one thing I know, is that you set me up, and you are watching right now, aren't you." You say, looking around for a camera or a microphone. "I don't care anymore," you say with a shaking tone, "whatever you want to do to me, just do it already. I'm too tired to keep going." You fall to your knees, ready for the worst. Moments later, the ground below you crumbles, and you fall into a seemingly bottomless pit."""
+        self.threshold = """ "I DON'T KNOW" You shout so loud you make your own ears hurt. "I don't know if I'll survive, I don't know what this place is, I don't know anything anymore." You keep shouting, just slightly quieter. "The one thing I know, is that you set me up, and you are watching right now, aren't you?" You say, looking around for a camera or a microphone. "I don't care anymore," you say with a shaking tone, "whatever you want to do to me, just do it already. I'm too tired to keep going." You fall to your knees, ready for the worst."""
+        self.secret_ending_label = Label(
+            text="",
+            font_size="19sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.secret_ending_label)
+        
+        self.type_secret_ending = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.secret_ending_text, self.secret_ending_label), 0.05)
+        pause_time = len(self.threshold) * 0.05 - 1.7
+        Clock.schedule_once(lambda dt: self.pause_typewrite(dt, self.type_secret_ending, 2, self.threshold), pause_time)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.impact.play(), pause_time + 2)
+            Clock.schedule_once(lambda dt: self.death_sound.play(), pause_time + 2.5)
+        schedule_time = len(self.secret_ending_text) * 0.05 + 2
+        Clock.schedule_once(self.sleeping, schedule_time)
+        
+    def sleeping(self, dt):
+        self.layout.clear_widgets()
+        Clock.schedule_once(self.wake_up, 10)
+        if self.effects_on:
+            Clock.schedule_once(lambda dt: self.alarm.play(), 8.5)
+    
+    def wake_up(self, dt):
+        self.layout.clear_widgets()
+        self.wake_up_text = """You wake up to the sound of an alarm that you instinctively turn off. You open your eyes, and your brain clicks. You sit on the bed you were lying on, only to find yourself in your house. The house looks exactly like you remember it. The sofas, the window, everything. Then you realize, "was this all a dream?" you ask yourself. Whatever it was, you're just happy it's over. You stand up, go to your bathroom and wash yourself. You dress up and head out to your office to do your boring, boring work. You're just happy you returned to your normal life."""
+        self.wake_up_label = Label(
+            text="",
+            font_size="20sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            color=self.brown,
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.wake_up_image = Image(
+            source="assets/House.png",
+            size_hint=(1, 0.6),
+            pos_hint={'center_x': 0.5, 'center_y': 0.7},
+            allow_stretch=True,
+            keep_ratio=False
+        )
+        if self.images_on:
+            self.layout.add_widget(self.wake_up_image)
+        self.layout.add_widget(self.text_background)
+        self.layout.add_widget(self.wake_up_label)
+        
+        self.type_wake_up = Clock.schedule_interval(lambda dt: self.typewrite(dt, self.wake_up_text, self.wake_up_label), 0.05)
+        schedule_time = len(self.wake_up_text) * 0.05
+        Clock.schedule_once(lambda dt: self.add_continue(dt, self.secret_exit), schedule_time)
+    
+    def secret_exit(self, dt):
+        self.layout.clear_widgets()
+        self.secret_exit_text = """You arrive at your office, your co-workers greet you with the usual "Good morning." None of them seem to react as if you were gone, maybe this was just a dream. You sit on your desk and boot up your PC. You start doing your boring but normal job. You are not really sure if it was a dream, but you decide to ignore it. You're just happy you returned to your normal life."""
+        self.secret_exit_label = Label(
+            text="",
+            font_size="24sp",
+            size_hint=(1, 0.6),
+            pos_hint={'x': 0, 'top': 0.95},
+            color=[0, 0.5, 0.5, 1],
+            text_size=(Window.width * 0.9, Window.height * 0.6),
+            halign='left',
+            valign='top',
+            bold=True
+        )
+        self.layout.add_widget(self.secret_exit_label)
+        
+        Clock.schedule_interval(lambda dt: self.typewrite(dt, self.secret_exit_text, self.secret_exit_label), 0.06)
+        schedule_time = len(self.secret_exit_text) * 0.06 + 1.5
+        Clock.schedule_once(self.real_SE, schedule_time)
+    
+    def real_SE(self, dt):
+        self.layout.clear_widgets()
+        if self.ambience:
+            try:
+                self.ambience.stop()
+            except:
+                pass
+                
+        self.vict_label = Label(
+            text="You escaped?",
+            font_size="50sp",
+            size_hint=(1, 0.25),
+            pos_hint={'center_x': 0.5, 'top': 0.99},
+            color=[0, 0.25, 1, 1],
+            text_size=(Window.width * 0.9, Window.height * 0.25),
+            halign='center',
+            valign='top'
+        )
+        self.death_no = str(self.death_count)
+        self.died_no = Label(
+            text=f"Died {self.death_no} times",
+            font_size="24sp",
+            size_hint=(1, 0.1),
+            color=[1, 0, 0, 1],
+            pos_hint={'center_x': 0.5, 'top': 0.9},
+            text_size=(Window.width * 0.9, Window.height * 0.1),
+            halign='center',
+            valign='top'
+        )
+        self.ending_no = Label(
+            text="Secret Ending.",
+            font_size="30sp",
+            size_hint=(1, 0.1),
+            color=[1, 0.1, 0.1, 1],
+            pos_hint={'center_x': 0.5, 'top': 0.84},
+            text_size=(Window.width * 0.9, Window.height * 0.1),
+            halign='center',
+            valign='top'    
+        )
+        self.main_menu_btn = Button(
+            text="Back to main menu",
+            font_size="22sp",
+            size_hint=(0.6, 0.2),
+            pos_hint={'center_x': 0.5, 'center_y': 0.2},
+            background_color=self.brown
+        )
+        self.main_menu_btn.bind(on_press=self.main_menu)
+        self.main_menu_btn.bind(on_press=self.resetdeaths)
+        
+        self.vict_label.opacity = 0
+        self.died_no.opacity = 0
+        self.ending_no.opacity = 0
+        self.layout.add_widget(self.vict_label)
+        self.layout.add_widget(self.died_no)
+        self.layout.add_widget(self.ending_no)
+        Clock.schedule_interval(lambda dt: self.image_appear(dt, self.vict_label, 1), 0.1)
+        Clock.schedule_interval(lambda dt: self.image_appear(dt, self.died_no, 1), 0.2)
+        Clock.schedule_interval(lambda dt: self.image_appear(dt, self.ending_no, 1), 0.2)
+        Clock.schedule_once(lambda dt: self.layout.add_widget(self.main_menu_btn), 2.5)
     
     def trap(self, instance):
         self.layout.clear_widgets()
